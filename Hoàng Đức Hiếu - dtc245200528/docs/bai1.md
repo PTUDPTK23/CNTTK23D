@@ -2,6 +2,7 @@
 Họ tên:  Hoàng Đức Hiếu            MSSV:   dtc245200528           Lớp:cntt k23d
  
 ## 1. Cài đặt
+<img width="1920" height="1080" alt="Screenshot (1)" src="https://github.com/user-attachments/assets/4f4a7c07-5222-4ec2-88b7-5fea2dd41235" />
 
  
 ## 2. MepDemo (Bước 7)
