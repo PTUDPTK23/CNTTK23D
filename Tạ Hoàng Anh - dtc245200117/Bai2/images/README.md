@@ -122,6 +122,36 @@
 
 ![EduSubmit - Kết quả máy khách](edusubmit-buoc-7-client.png)
 
+### Bước 8 — Kiểm tra bằng requests.http
+
+**Ảnh 1.** Lấy danh sách bài tập trả `200 OK`.
+
+![EduSubmit bước 8 - Danh sách bài tập](edusubmit-buoc-8-anh-1.png)
+
+**Ảnh 2.** Lấy bài tập ID 1 trả `200 OK`.
+
+![EduSubmit bước 8 - Bài tập ID 1](edusubmit-buoc-8-anh-2.png)
+
+**Ảnh 3.** Bài tập ID 999 trả `404 ASSIGNMENT_NOT_FOUND`.
+
+![EduSubmit bước 8 - Bài tập không tồn tại](edusubmit-buoc-8-anh-3.png)
+
+**Ảnh 4.** Nộp bài hợp lệ trả `201 Created` và `Location`.
+
+![EduSubmit bước 8 - Tạo lượt nộp](edusubmit-buoc-8-anh-4.png)
+
+**Ảnh 5.** Đọc lại lượt nộp vừa tạo trả `200 OK`.
+
+![EduSubmit bước 8 - Đọc lại lượt nộp](edusubmit-buoc-8-anh-5.png)
+
+**Ảnh 6.** Nộp dữ liệu rỗng trả `400 INVALID_SUBMISSION`.
+
+![EduSubmit bước 8 - Dữ liệu không hợp lệ](edusubmit-buoc-8-anh-6.png)
+
+**Ảnh 7.** Lượt nộp không tồn tại trả `404 SUBMISSION_NOT_FOUND`.
+
+![EduSubmit bước 8 - Lượt nộp không tồn tại](edusubmit-buoc-8-anh-7.png)
+
 ### Bảng phá thử EduSubmit
 
 | Ca | Yêu cầu | Kết quả mong đợi | Kết quả đã kiểm tra |
