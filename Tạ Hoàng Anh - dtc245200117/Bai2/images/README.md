@@ -60,6 +60,12 @@
 
 ![Catalog bước 6 - Thiếu Content-Type JSON](catalog-buoc-6-anh-8.png)
 
+### Bước 7–8 — Chạy Catalog.Client
+
+**Ảnh 1.** Máy khách liệt kê sản phẩm, tạo sản phẩm mới, đọc chi tiết sản phẩm 1 và xử lý `400 INVALID_PRODUCT` khi gửi dữ liệu sai.
+
+![Catalog - Kết quả máy khách](catalog-buoc-8-client.png)
+
 ## EduSubmit
 
 ### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
