@@ -1,0 +1,15 @@
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.exe
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.deps.json
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.runtimeconfig.json
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.dll
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.pdb
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.GeneratedMSBuildEditorConfig.editorconfig
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.AssemblyInfoInputs.cache
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.AssemblyInfo.cs
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.csproj.CoreCompileInputs.cache
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.sourcelink.json
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.dll
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\refint\Catalog.Client.dll
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.pdb
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.genruntimeconfig.cache
+D:\GITHUB\CNTTK23D\Trần Trung Dũng - dtc245200478\Bai 2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\ref\Catalog.Client.dll
