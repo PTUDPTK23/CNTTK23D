@@ -26,6 +26,40 @@
 
 ![Catalog - Kiểm tra tạo sản phẩm](catalog-buoc-5-kiem-thu.png)
 
+### Bước 6 — Kiểm tra bằng requests.http
+
+**Ảnh 1.** Kiểm tra máy chủ trả `200 OK`.
+
+![Catalog bước 6 - Kiểm tra máy chủ](catalog-buoc-6-anh-1.png)
+
+**Ảnh 2.** Lấy danh sách sản phẩm trả `200 OK`.
+
+![Catalog bước 6 - Danh sách sản phẩm](catalog-buoc-6-anh-2.png)
+
+**Ảnh 3.** Lấy sản phẩm ID 1 trả `200 OK`.
+
+![Catalog bước 6 - Sản phẩm ID 1](catalog-buoc-6-anh-3.png)
+
+**Ảnh 4.** Sản phẩm ID 999 trả `404 PRODUCT_NOT_FOUND`.
+
+![Catalog bước 6 - Sản phẩm không tồn tại](catalog-buoc-6-anh-4.png)
+
+**Ảnh 5.** ID `abc` trả `404` với body rỗng.
+
+![Catalog bước 6 - ID không phải số](catalog-buoc-6-anh-5.png)
+
+**Ảnh 6.** Tạo sản phẩm hợp lệ trả `201 Created` và `Location`.
+
+![Catalog bước 6 - Tạo sản phẩm](catalog-buoc-6-anh-6.png)
+
+**Ảnh 7.** Giá không hợp lệ trả `400 INVALID_PRODUCT`.
+
+![Catalog bước 6 - Giá không hợp lệ](catalog-buoc-6-anh-7.png)
+
+**Ảnh 8.** Thiếu `Content-Type` JSON trả `415 Unsupported Media Type`.
+
+![Catalog bước 6 - Thiếu Content-Type JSON](catalog-buoc-6-anh-8.png)
+
 ## EduSubmit
 
 ### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
