@@ -152,6 +152,32 @@
 
 ![EduSubmit bước 8 - Lượt nộp không tồn tại](edusubmit-buoc-8-anh-7.png)
 
+### Bước 9 — Kiểm tra nộp trùng và xóa lượt nộp
+
+**Ảnh 1.** Nộp vào bài tập đã đóng trả `400 ASSIGNMENT_CLOSED`.
+
+![EduSubmit bước 9a - Bài tập đã đóng](edusubmit-buoc-9-anh-1.png)
+
+**Ảnh 2.** Nộp bài SV002 trả `201 Created`.
+
+![EduSubmit bước 9b - Tạo lượt nộp](edusubmit-buoc-9-anh-2.png)
+
+**Ảnh 3.** Nộp trùng trả `409 DUPLICATE_SUBMISSION`.
+
+![EduSubmit bước 9c - Nộp trùng](edusubmit-buoc-9-anh-3.png)
+
+**Ảnh 4.** Xóa lượt nộp trả `204 No Content`.
+
+![EduSubmit bước 9d - Xóa lượt nộp](edusubmit-buoc-9-anh-4.png)
+
+**Ảnh 5.** Xóa lại lượt nộp trả `404 SUBMISSION_NOT_FOUND`.
+
+![EduSubmit bước 9e - Xóa lại lượt nộp](edusubmit-buoc-9-anh-5.png)
+
+**Ảnh 6.** Nộp lại SV002 sau khi xóa trả `201 Created` với ID mới.
+
+![EduSubmit bước 9f - Nộp lại sau khi xóa](edusubmit-buoc-9-anh-6.png)
+
 ### Bảng phá thử EduSubmit
 
 | Ca | Yêu cầu | Kết quả mong đợi | Kết quả đã kiểm tra |
@@ -163,7 +189,7 @@
 | 5e | POST body JSON sai cú pháp | `400 Bad Request` | Chưa kiểm tra |
 | 5f | POST body thiếu `repositoryUrl` | `400 INVALID_SUBMISSION` | Chưa kiểm tra |
 | 5g | PUT `/api/assignments/1` | `405 Method Not Allowed` | Chưa kiểm tra |
-| 5h | POST vào bài tập đã đóng | `400 ASSIGNMENT_CLOSED` | Chưa kiểm tra, cần dữ liệu bài tập có `IsOpen = false` |
+| 5h | POST vào bài tập đã đóng | `400 ASSIGNMENT_CLOSED` | Đã kiểm tra với bài tập 3, xem ảnh bước 9a |
 | 6a | GET địa chỉ `Location` vừa tạo | `200 OK`, đúng lượt nộp | Đã kiểm tra, xem ảnh bước 6 |
 | 6b | GET GUID chưa tồn tại | `404 SUBMISSION_NOT_FOUND` | Đã kiểm tra, xem ảnh bước 6 |
 | 6c | Khởi động lại API rồi GET lượt nộp cũ | `404 SUBMISSION_NOT_FOUND` | Chưa kiểm tra |

@@ -28,3 +28,34 @@ Content-Type: application/json
 
 ### Lượt nộp không tồn tại — 404 SUBMISSION_NOT_FOUND
 GET {{api}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### Bước 9a: Nộp vào bài tập đã đóng — 400 ASSIGNMENT_CLOSED
+POST {{api}}/api/assignments/3/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV002", "repositoryUrl": "https://example.com/sv002/rest-api" }
+
+### Bước 9b: Nộp bài SV002 — 201 Created
+# @name createExpandedSubmission
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV002", "repositoryUrl": "https://example.com/sv002/rest-api" }
+
+### Bước 9c: Nộp trùng SV002 — 409 DUPLICATE_SUBMISSION
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV002", "repositoryUrl": "https://example.com/sv002/rest-api" }
+
+### Bước 9d: Xóa lượt nộp ở 9b — 204 No Content
+DELETE {{api}}/api/submissions/{{createExpandedSubmission.response.body.$.id}}
+
+### Bước 9e: Xóa lại lượt nộp ở 9b — 404 SUBMISSION_NOT_FOUND
+DELETE {{api}}/api/submissions/{{createExpandedSubmission.response.body.$.id}}
+
+### Bước 9f: Nộp lại SV002 sau khi xóa — 201 Created
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV002", "repositoryUrl": "https://example.com/sv002/rest-api" }

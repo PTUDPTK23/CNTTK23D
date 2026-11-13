@@ -4,7 +4,8 @@ var app = builder.Build();
 var assignments = new List<AssignmentDto>
 {
     new(1, "Bai tap REST API", "Thiet ke endpoint...", true),
-    new(2, "Bai tap Client", "Viet console client...", true)
+    new(2, "Bai tap Client", "Viet console client...", true),
+    new(3, "Bai tap da dong", "Bai tap khong con nhan bai nop.", false)
 };
 var submissions = new List<SubmissionDto>();
 
@@ -36,15 +37,21 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId
     if (string.IsNullOrWhiteSpace(request.StudentCode) || string.IsNullOrWhiteSpace(request.RepositoryUrl))
         return Results.BadRequest(new ApiError("INVALID_SUBMISSION", "Thieu ma sinh vien hoac kho ma nguon."));
 
-    var submission = new SubmissionDto(
-        Guid.NewGuid(), assignmentId, request.StudentCode.Trim(), request.RepositoryUrl.Trim(),
-        "received", DateTimeOffset.UtcNow);
     lock (submissions)
     {
-        submissions.Add(submission);
-    }
+        var studentCode = request.StudentCode.Trim();
+        var duplicated = submissions.Any(item =>
+            item.AssignmentId == assignmentId &&
+            item.StudentCode.Equals(studentCode, StringComparison.OrdinalIgnoreCase));
+        if (duplicated)
+            return Results.Conflict(new ApiError("DUPLICATE_SUBMISSION", "Sinh vien da nop bai tap nay."));
 
-    return Results.Created($"/api/submissions/{submission.Id}", submission);
+        var submission = new SubmissionDto(
+            Guid.NewGuid(), assignmentId, studentCode, request.RepositoryUrl.Trim(),
+            "received", DateTimeOffset.UtcNow);
+        submissions.Add(submission);
+        return Results.Created($"/api/submissions/{submission.Id}", submission);
+    }
 });
 
 app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
@@ -55,6 +62,19 @@ app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
         return submission is null
             ? Results.NotFound(new ApiError("SUBMISSION_NOT_FOUND", "Khong tim thay luot nop."))
             : Results.Ok(submission);
+    }
+});
+
+app.MapDelete("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
+{
+    lock (submissions)
+    {
+        var submission = submissions.FirstOrDefault(item => item.Id == submissionId);
+        if (submission is null)
+            return Results.NotFound(new ApiError("SUBMISSION_NOT_FOUND", "Khong tim thay luot nop."));
+
+        submissions.Remove(submission);
+        return Results.NoContent();
     }
 });
 
