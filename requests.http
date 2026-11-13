@@ -1,0 +1,31 @@
+### Kiểm tra máy chủ đang chạy
+GET http://localhost:5100/
+
+### Lấy danh sách sản phẩm
+GET http://localhost:5100/api/products
+
+### Lấy chi tiết sản phẩm id = 1
+GET http://localhost:5100/api/products/1
+
+### Lấy chi tiết sản phẩm không tồn tại (404)
+GET http://localhost:5100/api/products/999
+
+### Tạo sản phẩm mới (201 Created)
+POST http://localhost:5100/api/products
+Content-Type: application/json
+
+{
+  "name": "Lap trinh C# nang cao",
+  "description": "Tai lieu tham khao",
+  "price": 180000
+}
+
+### Gửi dữ liệu sai để kiểm tra lỗi (400 Bad Request)
+POST http://localhost:5100/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "",
+  "price": -10
+}
