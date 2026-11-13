@@ -84,6 +84,12 @@
 
 ![EduSubmit bước 2 - Gọi endpoint gốc](edusubmit-buoc-2-curl.png)
 
+### Bước 3 — Danh sách bài tập
+
+**Ảnh 1.** Gọi `GET /api/assignments` trả `200 OK` và hai bài tập mẫu.
+
+![EduSubmit bước 3 - Danh sách bài tập](edusubmit-buoc-3-danh-sach.png)
+
 ### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
 
 **Ảnh 1.** Submission API đang chạy tại `http://localhost:5000`.
