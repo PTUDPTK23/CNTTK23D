@@ -74,6 +74,16 @@
 
 ![EduSubmit - Build solution](edusubmit-buoc-1-build.png)
 
+### Bước 2 — Chạy và kiểm tra máy chủ
+
+**Ảnh 1.** Máy chủ `Submission.Api` chạy trên cổng 5000.
+
+![EduSubmit bước 2 - Chạy máy chủ](edusubmit-buoc-2-may-chu.png)
+
+**Ảnh 2.** Gọi `GET /` bằng `curl.exe` trả `200 OK` và JSON trạng thái dịch vụ.
+
+![EduSubmit bước 2 - Gọi endpoint gốc](edusubmit-buoc-2-curl.png)
+
 ### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
 
 **Ảnh 1.** Submission API đang chạy tại `http://localhost:5000`.
