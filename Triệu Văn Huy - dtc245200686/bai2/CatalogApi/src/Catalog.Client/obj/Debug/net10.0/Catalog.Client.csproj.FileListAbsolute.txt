@@ -1,0 +1,14 @@
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.exe
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.deps.json
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.runtimeconfig.json
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.dll
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\bin\Debug\net10.0\Catalog.Client.pdb
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.GeneratedMSBuildEditorConfig.editorconfig
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.AssemblyInfoInputs.cache
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.AssemblyInfo.cs
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.csproj.CoreCompileInputs.cache
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.dll
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\refint\Catalog.Client.dll
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.pdb
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\Catalog.Client.genruntimeconfig.cache
+D:\ptudpt\bai2\CatalogApi\src\Catalog.Client\obj\Debug\net10.0\ref\Catalog.Client.dll
