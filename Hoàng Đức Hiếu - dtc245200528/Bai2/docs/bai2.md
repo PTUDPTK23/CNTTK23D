@@ -39,12 +39,16 @@ dotnet run --project src/Catalog.Client
 ### Ảnh kết quả
 
 **curl.exe: POST hợp lệ (201), POST sai (400), thiếu Content-Type (415)**
+<img width="1920" height="1080" alt="Screenshot (19)" src="https://github.com/user-attachments/assets/1dadcb35-6047-4f62-b3cb-83eae11850a6" />
+<img width="1920" height="1080" alt="Screenshot (20)" src="https://github.com/user-attachments/assets/e6b39b9d-cb6d-48e7-bec2-338201c6140b" />
+<img width="1920" height="1080" alt="Screenshot (21)" src="https://github.com/user-attachments/assets/7b222313-aa6e-4313-9e2e-43cd784aa35e" />
 
-(dán ảnh)
+
+
 
 **Máy khách: liệt kê → tạo mới → đọc chi tiết → gửi sai**
+<img width="1920" height="1080" alt="Screenshot (22)" src="https://github.com/user-attachments/assets/36473b35-98b6-4248-8f59-f04ea4e0e91c" />
 
-(dán ảnh)
 
 ## 2. EduSubmit lát cắt 2 (Phần 3)
 
@@ -82,23 +86,30 @@ dotnet run --project src/Submission.Client -- http://localhost:5000
 
 **Bước 2: `curl.exe -i http://localhost:5000/` → 200 OK**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (23)" src="https://github.com/user-attachments/assets/2deb30ca-1d31-402b-bbee-666702b3fb4f" />
+
 
 **Bước 3: `GET /api/assignments` → 200 + mảng JSON**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (24)" src="https://github.com/user-attachments/assets/45b1cba4-300b-479b-a6cf-78f5cf6c6b50" />
+
 
 **Bước 4: `/api/assignments/1` → 200, `/999` → 404 có ApiError, `/abc` → 404 body rỗng**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (25)" src="https://github.com/user-attachments/assets/19d5601f-71b9-44ed-8b42-b75ce91ea42d" />
+<img width="1920" height="1080" alt="Screenshot (26)" src="https://github.com/user-attachments/assets/dec2a9fc-66b2-44a1-8a43-317cd892e8c9" />
+<img width="1920" height="1080" alt="Screenshot (27)" src="https://github.com/user-attachments/assets/f1fd037d-2547-4b6e-9ec9-2bf8e2fa55bd" />
+
 
 **Bước 5: POST nộp bài → 201 + Location**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (28)" src="https://github.com/user-attachments/assets/faafd468-f52c-4c87-82a1-39da7d0093b4" />
+
 
 **Bước 6: GET lại theo Location → 200**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (29)" src="https://github.com/user-attachments/assets/7f0486c8-524e-4100-ba9f-dc415c9ffc97" />
+
 
 **Bước 7: máy khách chạy đủ 4 nấc**
 
