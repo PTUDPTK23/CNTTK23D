@@ -68,6 +68,12 @@
 
 ## EduSubmit
 
+### Bước 1 — Kiểm tra solution
+
+**Ảnh 1.** Chạy `dotnet build` trong thư mục `RestfulClientServer`. Cả `Submission.Api` và `Submission.Client` đều build thành công.
+
+![EduSubmit - Build solution](edusubmit-buoc-1-build.png)
+
 ### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
 
 **Ảnh 1.** Submission API đang chạy tại `http://localhost:5000`.
