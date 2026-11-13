@@ -68,6 +68,28 @@
 
 ## EduSubmit
 
+### Lệnh build và chạy
+
+Mở PowerShell tại thư mục `Bai2/RestfulClientServer`, sau đó build cả solution:
+
+```powershell
+dotnet build
+```
+
+Chạy API trong terminal thứ nhất và giữ terminal đó mở:
+
+```powershell
+dotnet run --project src/Submission.Api -- --urls http://localhost:5000
+```
+
+Chạy client trong terminal thứ hai, cũng tại thư mục `RestfulClientServer`:
+
+```powershell
+dotnet run --project src/Submission.Client -- http://localhost:5000
+```
+
+Bước 9 kiểm tra nộp trùng. Nếu SV001 đã nộp bài tập 1, chạy lại client sẽ nhận `409 DUPLICATE_SUBMISSION`. Khởi động lại API hoặc xóa lượt nộp cũ để chạy lại ca tạo mới. Dữ liệu chỉ lưu trong bộ nhớ và sẽ mất khi API dừng.
+
 ### Bước 1 — Kiểm tra solution
 
 **Ảnh 1.** Chạy `dotnet build` trong thư mục `RestfulClientServer`. Cả `Submission.Api` và `Submission.Client` đều build thành công.
@@ -115,6 +137,18 @@
 **Ảnh 2.** Gọi đúng địa chỉ trong `Location` trả `200 OK` và thông tin lượt nộp.
 
 ![EduSubmit - Đọc lại lượt nộp](edusubmit-buoc-6-doc-lai.png)
+
+**Ảnh 3.** Ca 6c: tạo lượt nộp và ghi lại ID từ `Location`.
+
+![EduSubmit bước 6c - Tạo lượt nộp](edusubmit-buoc-6c-tao.png)
+
+**Ảnh 4.** Dừng và khởi động lại API.
+
+![EduSubmit bước 6c - Khởi động lại API](edusubmit-buoc-6c-khoi-dong-lai.png)
+
+**Ảnh 5.** Gọi lại ID cũ trả `404 SUBMISSION_NOT_FOUND` vì dữ liệu trong bộ nhớ đã mất khi API dừng.
+
+![EduSubmit bước 6c - Đọc lại ID cũ](edusubmit-buoc-6c-ket-qua.png)
 
 ### Bước 7 — Chạy máy khách
 
@@ -185,14 +219,14 @@
 | 5a | POST bài tập 1 với `sv001.json` hợp lệ | `201 Created`, có `Location` | Đã kiểm tra, xem ảnh bước 5 |
 | 5b | POST bài tập 1 với `rong.json` | `400 INVALID_SUBMISSION` | Đã kiểm tra, xem ảnh bước 5 |
 | 5c | POST bài tập 999 | `404 ASSIGNMENT_NOT_FOUND` | Đã kiểm tra, xem ảnh bước 5 |
-| 5d | POST thiếu header `Content-Type` | `415 Unsupported Media Type` | Chưa kiểm tra |
-| 5e | POST body JSON sai cú pháp | `400 Bad Request` | Chưa kiểm tra |
-| 5f | POST body thiếu `repositoryUrl` | `400 INVALID_SUBMISSION` | Chưa kiểm tra |
-| 5g | PUT `/api/assignments/1` | `405 Method Not Allowed` | Chưa kiểm tra |
+| 5d | POST với `Content-Type: text/plain` thay vì JSON | `415 Unsupported Media Type` | Đã kiểm tra bằng HTTP, trả `415` |
+| 5e | POST body JSON sai cú pháp | `400 Bad Request` | Đã kiểm tra bằng HTTP, trả `400` |
+| 5f | POST body thiếu `repositoryUrl` | `400 INVALID_SUBMISSION` | Đã kiểm tra bằng HTTP, trả `400 INVALID_SUBMISSION` |
+| 5g | PUT `/api/assignments/1` | `405 Method Not Allowed` | Đã kiểm tra bằng HTTP, trả `405` |
 | 5h | POST vào bài tập đã đóng | `400 ASSIGNMENT_CLOSED` | Đã kiểm tra với bài tập 3, xem ảnh bước 9a |
 | 6a | GET địa chỉ `Location` vừa tạo | `200 OK`, đúng lượt nộp | Đã kiểm tra, xem ảnh bước 6 |
 | 6b | GET GUID chưa tồn tại | `404 SUBMISSION_NOT_FOUND` | Đã kiểm tra, xem ảnh bước 6 |
-| 6c | Khởi động lại API rồi GET lượt nộp cũ | `404 SUBMISSION_NOT_FOUND` | Chưa kiểm tra |
+| 6c | Khởi động lại API rồi GET lượt nộp cũ | `404 SUBMISSION_NOT_FOUND` | Đã kiểm tra, xem ảnh 3–5 của bước 6 |
 
 ### Ba câu hỏi giải thích
 
