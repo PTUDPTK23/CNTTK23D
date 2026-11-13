@@ -1,6 +1,6 @@
 # Bài 2 — RESTful API
 
-## Ảnh kết quả thực hành
+## Catalog
 
 ### Bước 2 — Chạy Catalog API và kiểm tra endpoint `/`
 
@@ -14,7 +14,21 @@
 
 ![Bước 3 - Kiểm tra danh sách sản phẩm](buoc-3-danh-sach-san-pham.png)
 
-### EduSubmit — Chạy API và kiểm tra bước 4
+### Bước 4 — Xem chi tiết sản phẩm
+
+**Ảnh 1.** Bốn ca kiểm tra lần lượt trả `200 OK`, `404 PRODUCT_NOT_FOUND`, `404` với body rỗng và `405 Method Not Allowed`.
+
+![Catalog - Kiểm tra chi tiết sản phẩm](catalog-buoc-4-kiem-thu.png)
+
+### Bước 5 — Tạo sản phẩm
+
+**Ảnh 1.** Tạo sản phẩm hợp lệ trả `201 Created` kèm `Location`, giá âm trả `400 INVALID_PRODUCT` và yêu cầu thiếu `Content-Type` JSON trả `415 Unsupported Media Type`.
+
+![Catalog - Kiểm tra tạo sản phẩm](catalog-buoc-5-kiem-thu.png)
+
+## EduSubmit
+
+### Bước 4 — Chạy API và kiểm tra chi tiết bài tập
 
 **Ảnh 1.** Submission API đang chạy tại `http://localhost:5000`.
 
@@ -24,13 +38,13 @@
 
 ![EduSubmit - Kiểm tra chi tiết bài tập](edusubmit-buoc-4.png)
 
-### EduSubmit — Bước 5: Nộp bài
+### Bước 5 — Nộp bài
 
 **Ảnh 1.** Nộp bài hợp lệ trả `201 Created` và `Location`. Dữ liệu rỗng trả `400 INVALID_SUBMISSION`, còn bài tập không tồn tại trả `404 ASSIGNMENT_NOT_FOUND`.
 
 ![EduSubmit - Kiểm tra nộp bài](edusubmit-buoc-5.png)
 
-### EduSubmit — Bước 6: Đọc lại lượt nộp
+### Bước 6 — Đọc lại lượt nộp
 
 **Ảnh 1.** Tạo lượt nộp trả `201 Created` kèm `Location`. Gọi GUID không tồn tại trả `404 SUBMISSION_NOT_FOUND`. Ảnh cũng cho thấy yêu cầu với chuỗi `ID-VUA-TAO` trả `404` vì không khớp định dạng GUID.
 
@@ -40,7 +54,13 @@
 
 ![EduSubmit - Đọc lại lượt nộp](edusubmit-buoc-6-doc-lai.png)
 
-## Bảng phá thử EduSubmit
+### Bước 7 — Chạy máy khách
+
+**Ảnh 1.** Máy khách liệt kê bài tập đang mở, tạo và đọc lại lượt nộp, rồi xử lý yêu cầu sai với `400 INVALID_SUBMISSION`.
+
+![EduSubmit - Kết quả máy khách](edusubmit-buoc-7-client.png)
+
+### Bảng phá thử EduSubmit
 
 | Ca | Yêu cầu | Kết quả mong đợi | Kết quả đã kiểm tra |
 | --- | --- | --- | --- |
@@ -56,16 +76,16 @@
 | 6b | GET GUID chưa tồn tại | `404 SUBMISSION_NOT_FOUND` | Đã kiểm tra, xem ảnh bước 6 |
 | 6c | Khởi động lại API rồi GET lượt nộp cũ | `404 SUBMISSION_NOT_FOUND` | Chưa kiểm tra |
 
-## Ba câu hỏi giải thích
+### Ba câu hỏi giải thích
 
-### 1. Vì sao URI dùng danh từ, còn hành động do phương thức HTTP đảm nhận?
+#### 1. Vì sao URI dùng danh từ, còn hành động do phương thức HTTP đảm nhận?
 
 URI định danh tài nguyên mà máy khách muốn làm việc, còn phương thức HTTP thể hiện thao tác. Trong code, `assignments` là tập bài tập và `submissions` là tập lượt nộp. Ví dụ `GET /api/assignments/1` đọc bài tập số 1, còn `POST /api/assignments/1/submissions` tạo lượt nộp thuộc bài tập đó.
 
-### 2. “Stateless” thể hiện ở đâu trong code đã viết?
+#### 2. “Stateless” thể hiện ở đâu trong code đã viết?
 
 Mỗi yêu cầu tự mang thông tin cần thiết để API xử lý. Với `POST /api/assignments/1/submissions`, mã bài tập nằm trong URI, còn `studentCode` và `repositoryUrl` nằm trong body. Máy chủ xử lý dựa trên yêu cầu hiện tại, không cần nhớ phiên làm việc của máy khách từ lần gọi trước. Danh sách bài tập và lượt nộp vẫn được lưu trong bộ nhớ máy chủ.
 
-### 3. Vì sao client và server mỗi bên khai báo DTO riêng mà vẫn khớp nhau?
+#### 3. Vì sao client và server mỗi bên khai báo DTO riêng mà vẫn khớp nhau?
 
-Hai bên trao đổi thông qua cấu trúc JSON đã thống nhất. Server dùng `CreateSubmissionRequest` với `StudentCode` và `RepositoryUrl`, tương ứng với các trường `studentCode` và `repositoryUrl` trong JSON. Khi xây dựng client ở bước tiếp theo, client có thể khai báo kiểu riêng với tên trường JSON và kiểu dữ liệu phù hợp, rồi gửi JSON để server đọc. Hai project vì thế có thể phát triển độc lập, dựa trên cùng một hợp đồng dữ liệu.
+Hai bên trao đổi thông qua cấu trúc JSON đã thống nhất. Server và client mỗi bên khai báo `CreateSubmissionRequest` riêng với `StudentCode` và `RepositoryUrl`, tương ứng với các trường `studentCode` và `repositoryUrl` trong JSON. Hai project vì thế có thể phát triển độc lập, dựa trên cùng một hợp đồng dữ liệu.
