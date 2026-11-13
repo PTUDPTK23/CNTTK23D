@@ -30,9 +30,22 @@ if (createResponse.StatusCode == HttpStatusCode.Created)
 }
 else
 {
-    Console.WriteLine($"\nLoi: HTTP {(int)createResponse.StatusCode}");
+    var error = await createResponse.Content.ReadFromJsonAsync<ApiError>();
+    Console.WriteLine($"\nLoi: HTTP {(int)createResponse.StatusCode} - {error?.Code}: {error?.Message}");
     return;
 }
 
+// Bước 3: GET lại chi tiết một sản phẩm
+var detail = await http.GetFromJsonAsync<ProductDto>("/api/products/1");
+Console.WriteLine($"\nChi tiet san pham 1: {detail?.Name ?? "khong tim thay"}");
+
+// Bước 4: cố ý gửi dữ liệu sai để đọc lỗi 400
+var invalidRequest = new CreateProductRequest("", "", -1m);
+var invalidResponse = await http.PostAsJsonAsync("/api/products", invalidRequest);
+Console.WriteLine($"\nThu gui du lieu sai: HTTP {(int)invalidResponse.StatusCode}");
+var invalidError = await invalidResponse.Content.ReadFromJsonAsync<ApiError>();
+Console.WriteLine($"{invalidError?.Code}: {invalidError?.Message}");
+
 record ProductDto(int Id, string Name, string Description, decimal Price);
 record CreateProductRequest(string Name, string? Description, decimal Price);
+record ApiError(string Code, string Message);
