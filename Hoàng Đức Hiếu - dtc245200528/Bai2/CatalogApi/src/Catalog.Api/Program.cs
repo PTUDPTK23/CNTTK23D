@@ -15,6 +15,15 @@ return product is null
 ? Results.NotFound(new ApiError("PRODUCT_NOT_FOUND","Khong tim thay san pham"))
 : Results.Ok(product);
 });
+app.MapPost("/api/products", (CreateProductRequest request) => {
+
+if (string.IsNullOrWhiteSpace(request.Name) || request.Price <= 0) {
+return Results.BadRequest(new ApiError(
+"INVALID_PRODUCT",
+"Ten san pham khong duoc de trong va gia phai lon hon 0."));
+}
+
+});
 app.Run();
 record ProductDto(int Id, string Name, string Description, decimal Price);
 record CreateProductRequest(string Name, string? Description, decimal Price); 
