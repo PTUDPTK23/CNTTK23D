@@ -9,5 +9,20 @@ Console.WriteLine("Danh sach san pham:");
 foreach (var p in products ?? []) {
 Console.WriteLine($"  [{p.Id}] {p.Name} -{p.Price:N0} VND");
 }
+var createRequest = new CreateProductRequest(
+    "Nhap mon REST API", "Sach tham khao", 120000);
 
+var createResponse = await http.PostAsJsonAsync("/api/products", createRequest);
+
+if (createResponse.StatusCode == HttpStatusCode.Created) {
+    var created = await createResponse.Content.ReadFromJsonAsync<ProductDto>();
+    Console.WriteLine($"\nDa tao san pham moi: [{created?.Id}] {created?.Name}");
+    Console.WriteLine($"Doc lai tai: {createResponse.Headers.Location}");
+} else {
+    var error = await createResponse.Content.ReadFromJsonAsync<ApiError>();
+    Console.WriteLine($"\nLoi: {error?.Code} - {error?.Message}");
+    return;
+}
 record ProductDto(int Id, string Name, string Description, decimal Price);
+record CreateProductRequest(string Name, string? Description, decimal Price);
+record ApiError(string Code, string Message);
