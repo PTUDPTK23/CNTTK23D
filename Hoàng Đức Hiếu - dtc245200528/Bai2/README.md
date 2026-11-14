@@ -113,7 +113,7 @@ dotnet run --project src/Submission.Client -- http://localhost:5000
 
 **Bước 7: máy khách chạy đủ 4 nấc**
 
-(dán ảnh)
+<img width="1920" height="1080" alt="Screenshot (30)" src="https://github.com/user-attachments/assets/fcdd87c0-ae52-4945-b536-9ecb967942cf" />
 
 ```
 Danh sach bai tap dang mo:
@@ -129,6 +129,11 @@ INVALID_SUBMISSION: Thieu ma sinh vien hoac kho ma nguon.
 ```
 
 **Bước 8: `requests.http` đủ 7 request (200, 201, 400, 404)**
+<img width="1920" height="1080" alt="Screenshot (30)" src="https://github.com/user-attachments/assets/f4683da2-36f1-456b-8ce9-d1a8e3fa3d4a" />
+<img width="1920" height="1080" alt="Screenshot (36)" src="https://github.com/user-attachments/assets/abb7ccac-26d3-4e2e-9376-6d6753d3020d" />
+<img width="1920" height="1080" alt="Screenshot (37)" src="https://github.com/user-attachments/assets/d82c0baf-becc-4b4d-b30c-f7f99054b321" />
+<img width="1920" height="1080" alt="Screenshot (38)" src="https://github.com/user-attachments/assets/0bf21451-ef8d-481f-b161-e5763c34fa40" />
+
 
 Tệp [`RestfulClientServer/requests.http`](RestfulClientServer/requests.http):
 
