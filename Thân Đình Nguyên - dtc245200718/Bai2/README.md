@@ -37,13 +37,13 @@ Mở `EduSubmit/requests.http` trong VS Code và bấm **Send Request** từng m
 | 7 | POST bài 3 đã đóng | 400 `ASSIGNMENT_CLOSED` | Sai quy tắc nghiệp vụ |
 | 8 | POST bài 999 | 404 `ASSIGNMENT_NOT_FOUND` | Bài tập không tồn tại |
 
-Máy khách in bốn nấc: danh sách bài tập đang mở → nộp bài và nhận 201 → đọc lại từ `Location` → gửi sai và in `INVALID_SUBMISSION` mà không sập. Các mã trên là **kết quả dự kiến theo code**; cần chạy trên máy có .NET để lấy ảnh kết quả thực tế.
+Máy khách in bốn nấc: danh sách bài tập đang mở → nộp bài và nhận mã lượt nộp → đọc lại từ `Location` → gửi sai và in `INVALID_SUBMISSION` mà không sập. Ảnh chạy thực tế dưới đây xác nhận bốn nấc đó và phản hồi `400 BadRequest` cho yêu cầu sai. Các mã trong bảng là kết quả mong đợi khi thử từng request trong `requests.http`.
+
+![Submission.Client chạy bốn nấc, đọc lại lượt nộp và hiển thị lỗi 400](edusubmit-client.png)
 
 Ảnh kết quả thực tế của phần Catalog đã chạy trên lớp:
 
 ![Catalog.Client in bốn nấc và mã lỗi 400](catalog-client.png)
-
-Ảnh chạy EduSubmit mới cần được bổ sung sau khi chạy trên máy có .NET SDK 10.
 
 ## Ba câu hỏi giải thích
 
