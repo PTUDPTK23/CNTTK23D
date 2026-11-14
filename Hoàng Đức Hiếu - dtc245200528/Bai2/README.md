@@ -115,7 +115,32 @@ dotnet run --project src/Submission.Client -- http://localhost:5000
 
 (dán ảnh)
 
+```
+Danh sach bai tap dang mo:
+- 1: Bai tap REST API
+- 2: Bai tap Client
+
+Da tao luot nop: ea51310d-5ac5-443b-875d-3b520931bea5
+Trang thai ban dau: received
+Doc lai luot nop: SV001 - https://example.com/sv001/rest-api
+
+Thu gui yeu cau loi: 400 BadRequest
+INVALID_SUBMISSION: Thieu ma sinh vien hoac kho ma nguon.
+```
+
 **Bước 8: `requests.http` đủ 7 request (200, 201, 400, 404)**
+
+Tệp [`RestfulClientServer/requests.http`](RestfulClientServer/requests.http):
+
+| # | Request | Mã mong đợi |
+|---|---|---|
+| 1 | `GET /api/assignments` | 200 |
+| 2 | `GET /api/assignments/1` | 200 |
+| 3 | `GET /api/assignments/999` | 404 `ASSIGNMENT_NOT_FOUND` |
+| 4 | `POST /api/assignments/1/submissions` (SV001) | 201 + Location |
+| 5 | `GET /api/submissions/{id vừa tạo}` | 200 |
+| 6 | `POST /api/assignments/1/submissions` (rỗng) | 400 `INVALID_SUBMISSION` |
+| 7 | `GET /api/submissions/00000000-...` | 404 `SUBMISSION_NOT_FOUND` |
 
 (dán ảnh)
 
@@ -123,14 +148,16 @@ dotnet run --project src/Submission.Client -- http://localhost:5000
 
 | Ca | Yêu cầu | Dự đoán | Thực tế | Ai trả | Giải thích |
 |---|---|---|---|---|---|
-| 5a | POST bài 1, body `sv001.json` | 201 + Location | | Handler | Tạo thành công, có địa chỉ để đọc lại |
-| 5b | POST bài 1, body `rong.json` | 400 `INVALID_SUBMISSION` | | Handler | Máy khách gửi thiếu dữ liệu |
-| 5c | POST bài 999, body `sv001.json` | 404 `ASSIGNMENT_NOT_FOUND` | | Handler | Tài nguyên cha không tồn tại |
-| 5d | Như 5a nhưng bỏ `-H "Content-Type..."` | 415, body rỗng | | Framework | Không biết body là JSON nên hàm xử lý không chạy |
-| 5e | Body JSON hỏng `{"studentCode":"SV001",` | 400, body văn bản | | Framework | Không đọc được body |
-| 5f | Body thiếu `repositoryUrl` | 400 `INVALID_SUBMISSION` | | Handler | Trường thiếu thành null, handler bắt được |
-| 5g | `PUT /api/assignments/1` | 405, `Allow: GET` | | Framework | URI có nhưng phương thức không được hỗ trợ |
-| 5h | Đặt bài 2 `IsOpen = false`, POST vào bài 2 | 400 `ASSIGNMENT_CLOSED` | | Handler | Đúng cú pháp nhưng sai quy tắc nghiệp vụ |
+| 5a | POST bài 1, body `sv001.json` | 201 + Location | `201 Created`, `Location: /api/submissions/c761f755-...`, body có `"status":"received"` | Handler | Tạo thành công, có địa chỉ để đọc lại |
+| 5b | POST bài 1, body `rong.json` | 400 `INVALID_SUBMISSION` | `400 Bad Request`, `{"code":"INVALID_SUBMISSION",...}` | Handler | Máy khách gửi thiếu dữ liệu |
+| 5c | POST bài 999, body `sv001.json` | 404 `ASSIGNMENT_NOT_FOUND` | `404 Not Found`, `{"code":"ASSIGNMENT_NOT_FOUND",...}` | Handler | Tài nguyên cha không tồn tại |
+| 5d | Như 5a nhưng bỏ `-H "Content-Type..."` | 415, body rỗng | `415 Unsupported Media Type`, `Content-Length: 0` | Framework | Không biết body là JSON nên hàm xử lý không chạy |
+| 5e | Body JSON hỏng `{"studentCode":"SV001",` | 400, body văn bản | `400 Bad Request`, `text/plain`: `Failed to read parameter "CreateSubmissionRequest request" from the request body as JSON` | Framework | Không đọc được body |
+| 5f | Body thiếu `repositoryUrl` | 400 `INVALID_SUBMISSION` | `400 Bad Request`, `{"code":"INVALID_SUBMISSION",...}` | Handler | Trường thiếu thành null, handler bắt được |
+| 5g | `PUT /api/assignments/1` | 405, `Allow: GET` | `405 Method Not Allowed`, `Allow: GET`, body rỗng | Framework | URI có nhưng phương thức không được hỗ trợ |
+| 5h | Đặt bài 2 `IsOpen = false`, POST vào bài 2 | 400 `ASSIGNMENT_CLOSED` | `400 Bad Request`, `{"code":"ASSIGNMENT_CLOSED",...}` | Handler | Đúng cú pháp nhưng sai quy tắc nghiệp vụ |
+
+Cả 8 ca đều đúng như dự đoán. 5 ca do handler trả luôn có `ApiError`, 3 ca do framework trả (5d, 5e, 5g) thì không.
 
 ## 4. Trả lời 3 câu hỏi
 
