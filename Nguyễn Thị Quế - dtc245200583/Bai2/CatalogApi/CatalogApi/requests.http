@@ -1,0 +1,46 @@
+
+@api = http://localhost:5100
+
+### 1. Kiểm tra máy chủ - 200 OK
+GET {{api}}/
+
+### 2. Lấy danh sách sản phẩm - 200 OK
+GET {{api}}/api/products
+
+### 3. Lấy sản phẩm có ID = 1 - 200 OK
+GET {{api}}/api/products/1
+
+### 4. Lấy sản phẩm không tồn tại - 404 Not Found
+GET {{api}}/api/products/999
+
+### 5. Lấy sản phẩm với ID không phải số - 404 Not Found
+GET {{api}}/api/products/abc
+
+### 6. Tạo sản phẩm hợp lệ - 201 Created
+POST {{api}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Lap trinh gRPC",
+  "description": "Tai lieu bai 5",
+  "price": 80000
+}
+
+### 7. Tạo sản phẩm sai dữ liệu - 400 Bad Request
+POST {{api}}/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "San pham kiem tra",
+  "price": 80000
+}
+
+### 8. Tạo sản phẩm thiếu Content-Type - dự kiến 415
+POST {{api}}/api/products
+
+{
+  "name": "San pham test",
+  "description": "Kiem tra thieu header",
+  "price": 50000
+}
