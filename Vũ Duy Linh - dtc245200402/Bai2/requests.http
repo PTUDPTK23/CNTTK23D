@@ -1,0 +1,61 @@
+@api = http://localhost:5000
+
+### 1. Kiem tra may chu dang chay (Health check) -> 200 OK
+GET {{api}}/
+
+### 2. Lay danh sach bai tap (List assignments) -> 200 OK
+GET {{api}}/api/assignments
+
+### 3. Chi tiet bai tap ton tai (Existing assignment) -> 200 OK
+GET {{api}}/api/assignments/1
+
+### 4. Bai tap khong ton tai (Missing assignment) -> 404 Not Found + ASSIGNMENT_NOT_FOUND
+GET {{api}}/api/assignments/999
+
+### 5. Nop bai hop le vao bai tap mo -> 201 Created + Header Location
+# @name createSubmission
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200402",
+  "repositoryUrl": "https://github.com/dtc245200402-bit/V-Duy-Linh-dtc245200402"
+}
+
+### 6. Doc lai luot nop vua tao qua Location -> 200 OK
+GET {{api}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 7. Nop bai thieu thong tin (du lieu rong) -> 400 Bad Request + INVALID_SUBMISSION
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "",
+  "repositoryUrl": ""
+}
+
+### 8. Nop vao bai tap da dong -> 400 Bad Request + ASSIGNMENT_CLOSED
+POST {{api}}/api/assignments/2/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200402",
+  "repositoryUrl": "https://github.com/dtc245200402-bit/V-Duy-Linh-dtc245200402"
+}
+
+### 9. Luot nop khong ton tai -> 404 Not Found + SUBMISSION_NOT_FOUND
+GET {{api}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 10. Thieu header Content-Type -> 415 Unsupported Media Type
+POST {{api}}/api/assignments/1/submissions
+
+{
+  "studentCode": "dtc245200402",
+  "repositoryUrl": "https://github.com/dtc245200402-bit/V-Duy-Linh-dtc245200402"
+}
+
+### 11. Sai phuong thuc HTTP -> 405 Method Not Allowed
+PUT {{api}}/api/assignments/1
+Content-Type: application/json
+
+{}
