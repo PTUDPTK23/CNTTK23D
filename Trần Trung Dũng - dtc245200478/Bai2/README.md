@@ -63,6 +63,10 @@ INVALID_PRODUCT: Tên sản phẩm không được trống và giá phải lớn
 
 ## Ảnh kết quả
 
-Ảnh dưới đây trình bày output ghi nhận từ lần chạy thực tế của client và các request HTTP đã kiểm tra.
+Ảnh chụp output client thực tế trong VS Code: danh sách ban đầu, tạo sản phẩm mới, đọc chi tiết và xử lý lỗi 400.
 
-![Kết quả chạy Submission.Client và HTTP requests](docs/ket-qua-thuc-te.svg)
+![Ảnh chụp kết quả chạy client trong VS Code](docs/anh-client-thuc-te.png)
+
+Ảnh tổng hợp các kết quả đã kiểm tra: build, health check, sản phẩm không tồn tại và request thiếu Content-Type.
+
+![Tổng hợp kết quả API](docs/ket-qua-thuc-te.svg)
