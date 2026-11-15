@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="650" viewBox="0 0 1180 650">
+  <rect width="1180" height="650" rx="18" fill="#0b1220"/>
+  <rect x="0" y="0" width="1180" height="48" rx="18" fill="#17243a"/>
+  <circle cx="28" cy="24" r="7" fill="#ff605c"/><circle cx="52" cy="24" r="7" fill="#ffbd44"/><circle cx="76" cy="24" r="7" fill="#00ca4e"/>
+  <text x="590" y="30" text-anchor="middle" fill="#dbeafe" font-family="Segoe UI, sans-serif" font-size="17">Submission.Client — kết quả chạy thực tế</text>
+  <g fill="#d7e3f4" font-family="Consolas, monospace" font-size="17">
+    <text x="32" y="88">Danh sach san pham:</text>
+    <text x="32" y="116">  [1] Giao trinh Lap trinh phan tan - 150.000 VND</text>
+    <text x="32" y="144">  [2] Tai lieu RESTful API - 90.000 VND</text>
+    <text x="32" y="172">  [3] Bai tap thuc hanh .NET - 120.000 VND</text>
+    <text x="32" y="222">Da tao san pham moi: [4] Lap trinh gRPC</text>
+    <text x="32" y="250">Doc lai tai: /api/products/4</text>
+    <text x="32" y="300">Chi tiet san pham 1: Giao trinh Lap trinh phan tan</text>
+    <text x="32" y="350">Thu gui du lieu sai: HTTP 400</text>
+    <text x="32" y="378" fill="#fbbf24">INVALID_PRODUCT: Tên sản phẩm không được trống và giá phải lớn hơn 0.</text>
+    <text x="32" y="442" fill="#93c5fd">GET / → HTTP 200, service=Submission.Api, status=running</text>
+    <text x="32" y="484" fill="#fca5a5">GET /api/products/999 → HTTP 404, PRODUCT_NOT_FOUND</text>
+    <text x="32" y="526" fill="#fca5a5">POST thiếu Content-Type → HTTP 415 Unsupported Media Type</text>
+    <text x="32" y="600" fill="#86efac">Build: 0 warning(s), 0 error(s)</text>
+  </g>
+</svg>
