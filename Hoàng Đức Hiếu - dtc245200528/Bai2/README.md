@@ -39,15 +39,15 @@ dotnet run --project src/Catalog.Client
 ### Ảnh kết quả
 
 **curl.exe: POST hợp lệ (201), POST sai (400), thiếu Content-Type (415)**
-<img width="1920" height="1080" alt="Screenshot (19)" src="https://github.com/user-attachments/assets/1dadcb35-6047-4f62-b3cb-83eae11850a6" />
-<img width="1920" height="1080" alt="Screenshot (20)" src="https://github.com/user-attachments/assets/e6b39b9d-cb6d-48e7-bec2-338201c6140b" />
-<img width="1920" height="1080" alt="Screenshot (21)" src="https://github.com/user-attachments/assets/7b222313-aa6e-4313-9e2e-43cd784aa35e" />
+![Screenshot 19](images/screenshot-19.png)
+![Screenshot 20](images/screenshot-20.png)
+![Screenshot 21](images/screenshot-21.png)
 
 
 
 
 **Máy khách: liệt kê → tạo mới → đọc chi tiết → gửi sai**
-<img width="1920" height="1080" alt="Screenshot (22)" src="https://github.com/user-attachments/assets/36473b35-98b6-4248-8f59-f04ea4e0e91c" />
+![Screenshot 22](images/screenshot-22.png)
 
 
 ## 2. EduSubmit lát cắt 2 (Phần 3)
@@ -66,7 +66,7 @@ Mọi lỗi do handler trả về cùng một dạng `{ "code": "...", "message"
 ### Lệnh đã chạy
 
 ```powershell
-mkdir RestfulClientServer ; cd RestfulClientServer
+cd Bai2
 dotnet new sln -n RestfulClientServer
 dotnet new web -n Submission.Api -o src/Submission.Api
 dotnet new console -n Submission.Client -o src/Submission.Client
@@ -86,34 +86,34 @@ dotnet run --project src/Submission.Client -- http://localhost:5000
 
 **Bước 2: `curl.exe -i http://localhost:5000/` → 200 OK**
 
-<img width="1920" height="1080" alt="Screenshot (23)" src="https://github.com/user-attachments/assets/2deb30ca-1d31-402b-bbee-666702b3fb4f" />
+![Screenshot 23](images/screenshot-23.png)
 
 
 **Bước 3: `GET /api/assignments` → 200 + mảng JSON**
 
-<img width="1920" height="1080" alt="Screenshot (24)" src="https://github.com/user-attachments/assets/45b1cba4-300b-479b-a6cf-78f5cf6c6b50" />
+![Screenshot 24](images/screenshot-24.png)
 
 
 **Bước 4: `/api/assignments/1` → 200, `/999` → 404 có ApiError, `/abc` → 404 body rỗng**
 
-<img width="1920" height="1080" alt="Screenshot (25)" src="https://github.com/user-attachments/assets/19d5601f-71b9-44ed-8b42-b75ce91ea42d" />
-<img width="1920" height="1080" alt="Screenshot (26)" src="https://github.com/user-attachments/assets/dec2a9fc-66b2-44a1-8a43-317cd892e8c9" />
-<img width="1920" height="1080" alt="Screenshot (27)" src="https://github.com/user-attachments/assets/f1fd037d-2547-4b6e-9ec9-2bf8e2fa55bd" />
+![Screenshot 25](images/screenshot-25.png)
+![Screenshot 26](images/screenshot-26.png)
+![Screenshot 27](images/screenshot-27.png)
 
 
 **Bước 5: POST nộp bài → 201 + Location**
 
-<img width="1920" height="1080" alt="Screenshot (28)" src="https://github.com/user-attachments/assets/faafd468-f52c-4c87-82a1-39da7d0093b4" />
+![Screenshot 28](images/screenshot-28.png)
 
 
 **Bước 6: GET lại theo Location → 200**
 
-<img width="1920" height="1080" alt="Screenshot (29)" src="https://github.com/user-attachments/assets/7f0486c8-524e-4100-ba9f-dc415c9ffc97" />
+![Screenshot 29](images/screenshot-29.png)
 
 
 **Bước 7: máy khách chạy đủ 4 nấc**
 
-<img width="1920" height="1080" alt="Screenshot (30)" src="https://github.com/user-attachments/assets/fcdd87c0-ae52-4945-b536-9ecb967942cf" />
+![Screenshot 30](images/screenshot-30.png)
 
 ```
 Danh sach bai tap dang mo:
@@ -129,13 +129,18 @@ INVALID_SUBMISSION: Thieu ma sinh vien hoac kho ma nguon.
 ```
 
 **Bước 8: `requests.http` đủ 7 request (200, 201, 400, 404)**
-<img width="1920" height="1080" alt="Screenshot (30)" src="https://github.com/user-attachments/assets/f4683da2-36f1-456b-8ce9-d1a8e3fa3d4a" />
-<img width="1920" height="1080" alt="Screenshot (36)" src="https://github.com/user-attachments/assets/abb7ccac-26d3-4e2e-9376-6d6753d3020d" />
-<img width="1920" height="1080" alt="Screenshot (37)" src="https://github.com/user-attachments/assets/d82c0baf-becc-4b4d-b30c-f7f99054b321" />
-<img width="1920" height="1080" alt="Screenshot (38)" src="https://github.com/user-attachments/assets/0bf21451-ef8d-481f-b161-e5763c34fa40" />
+
+![REST Client 31](images/screenshot-31.png)
+![REST Client 32](images/screenshot-32.png)
+![REST Client 33](images/screenshot-33.png)
+![REST Client 34](images/screenshot-34.png)
+![REST Client 35](images/screenshot-35.png)
+![REST Client 36](images/screenshot-36.png)
+![REST Client 37](images/screenshot-37.png)
+![REST Client 38](images/screenshot-38.png)
 
 
-Tệp [`RestfulClientServer/requests.http`](RestfulClientServer/requests.http):
+Tệp [`requests.http`](requests.http):
 
 | # | Request | Mã mong đợi |
 |---|---|---|
@@ -147,7 +152,6 @@ Tệp [`RestfulClientServer/requests.http`](RestfulClientServer/requests.http):
 | 6 | `POST /api/assignments/1/submissions` (rỗng) | 400 `INVALID_SUBMISSION` |
 | 7 | `GET /api/submissions/00000000-...` | 404 `SUBMISSION_NOT_FOUND` |
 
-(dán ảnh)
 
 ## 3. Bảng phá thử (8 ca ở bước 5)
 
