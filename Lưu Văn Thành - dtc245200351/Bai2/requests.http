@@ -29,3 +29,14 @@ Content-Type: application/json
   "description": "",
   "price": -10
 }
+
+### Cập nhật thông tin sản phẩm (200 OK / 204 No Content)
+PUT http://localhost:5100/api/products/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Lap trinh C# nang cao (Tai ban)",
+  "description": "Tai lieu tham khao cap nhat",
+  "price": 200000
+}
