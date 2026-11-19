@@ -1,0 +1,49 @@
+@api = http://localhost:5000
+
+### Health check: 200
+GET {{api}}/
+
+### Danh muc sach: 200
+GET {{api}}/api/books
+
+### Tim sach theo ten: 200
+GET {{api}}/api/books?q=code
+
+### Chi tiet sach: 200
+GET {{api}}/api/books/1
+
+### Sach khong ton tai: 404
+GET {{api}}/api/books/999
+
+### Dat muon hop le: 201; sao chep id tu response de thu GET o duoi
+POST {{api}}/api/reservations
+Content-Type: application/json
+
+{
+  "bookId": 1,
+  "studentCode": "SV001",
+  "studentName": "Nguyen Van A"
+}
+
+### Du lieu khong hop le: 400
+POST {{api}}/api/reservations
+Content-Type: application/json
+
+{
+  "bookId": 0,
+  "studentCode": "",
+  "studentName": ""
+}
+
+### Dat muon sach da het ban: 409 (sach id 4 mac dinh het)
+POST {{api}}/api/reservations
+Content-Type: application/json
+
+{
+  "bookId": 4,
+  "studentCode": "SV001",
+  "studentName": "Nguyen Van A"
+}
+
+### Doc yeu cau: thay GUID bang id nhan duoc tu POST de duoc 200; GUID gia de duoc 404
+GET {{api}}/api/reservations/00000000-0000-0000-0000-000000000000
