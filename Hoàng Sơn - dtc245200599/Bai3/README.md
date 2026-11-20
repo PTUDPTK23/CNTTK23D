@@ -70,3 +70,41 @@ Kết quả chạy thử trên cổng tạm 49351 vì cổng 5200 đang được
     An da ket noi den PingApi.
     [Echo] Echo: Xin chao SignalR tu An
     Dang cho thong diep... Nhan Enter de thoat.
+
+## Bước 5 – Phát rộng và gửi tin theo nhóm
+
+### Bước 5.1 – Thêm phương thức cho PingHub
+
+Broadcast dùng Clients.All để gửi cho mọi kết nối đang mở, kể cả người gửi. JoinGroup thêm kết nối hiện tại vào nhóm và thông báo cho nhóm. SendToGroup dùng Clients.Group để gửi tin cho các kết nối thuộc nhóm. Echo vẫn dùng Clients.Caller để trả lời riêng người gọi.
+
+### Bước 5.2 – Đăng ký sự kiện và gọi phương thức từ máy khách
+
+Máy khách đăng ký BroadcastMessage và GroupMessage trước StartAsync. Sau khi kết nối và gọi Echo, máy khách vào nhóm lop-hoc-01, gửi tin nhóm, rồi phát rộng. Build cả hai project thành công với 0 cảnh báo và 0 lỗi.
+
+### Bước 5.3 – Chạy An và Bình, đối chiếu trang 35
+
+Từ thư mục PingSignalR, khởi động lại máy chủ trong terminal thứ nhất.
+
+    dotnet run --project src/Ping.Api --urls http://localhost:5200
+
+Chạy An trong terminal thứ hai và giữ kết nối mở.
+
+    dotnet run --project src/Ping.Client -- http://localhost:5200 An
+
+Sau khi An vào nhóm, chạy Bình trong terminal thứ ba.
+
+    dotnet run --project src/Ping.Client -- http://localhost:5200 Binh
+
+Kết quả chạy thử trên cổng tạm 64414 vì cổng 5200 đang có máy chủ khác chạy. Các dòng chính trong terminal của An gồm:
+
+    [Echo] Echo: Xin chao SignalR tu An
+    [Group] Thong bao nhom tu Binh
+    [Broadcast] Xin chao tat ca tu Binh
+
+Terminal của Bình in:
+
+    [Echo] Echo: Xin chao SignalR tu Binh
+    [Group] Thong bao nhom tu Binh
+    [Broadcast] Xin chao tat ca tu Binh
+
+An không nhận Echo của Bình. Bình tham gia sau nên không thấy các tin An đã gửi trước đó. Dòng [System] trong hình minh họa sẽ được thêm ở bước 6.
