@@ -177,8 +177,6 @@ Các thí nghiệm 3–5 sửa tạm `Submission.RealtimeClient/Program.cs`, ch�
 | 8 | `POST /hubs/submissions/negotiate` | 200 | 200 |
 | 9 | `POST /hub/submissions/negotiate` | 404 | 404 |
 
-Ngoài `requests.http` (dùng với REST Client), script `kiem-thu-9-ca.ps1` chạy cả 9 ca bằng curl.
-
 #### Minh chứng các mã phản hồi từ `requests.http`:
 
 - **Ca 200 OK (GET danh sách bài tập):**  
