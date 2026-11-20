@@ -235,3 +235,25 @@ Thêm `builder.Services.AddSignalR()`, `app.MapHub<SubmissionHub>("/hubs/submiss
 Thấy: negotiate ở `/hubs/submissions` trả `connectionId` + 3 cách truyền tải; `/hub/submissions` trả `404 Not Found`.
 
 Giải thích: hub **mỏng** – không tạo, không chấm bài; nghiệp vụ nằm ở REST và tác vụ nền. Dùng nhóm theo lượt nộp vì 2 lý do: **riêng tư** (sinh viên không thấy trạng thái bài của người khác) và **tiết kiệm băng thông** (chỉ gửi đúng người, thay vì `Clients.All` gửi cho tất cả rồi máy khách tự lọc). Nhóm do máy chủ quản lý. `SubmissionGroups` là chỗ duy nhất sinh tên nhóm nên hai phía không lệch tên (câu ②).
+
+## EduSubmit – Bước 4: IHubContext + mô phỏng chấm bài ở nền
+
+- POST nhận thêm `IHubContext<SubmissionHub> hubContext` và gọi `_ = SimulateGradingAsync(...)` (chạy nền, không `await`) rồi trả `201` ngay.
+- `SimulateGradingAsync`: chờ 1 giây → `processing`, chờ 2 giây → `graded`.
+- `UpdateStatusAsync`: (1) cập nhật dữ liệu trong `lock` bằng `with { Status, UpdatedAt }`, (2) tạo `SubmissionStatusMessage` chỉ 3 trường, (3) `hub.Clients.Group("submission:{id}").SendAsync("SubmissionStatusChanged", msg)`.
+
+Terminal 2 – POST rồi GET 3 lần (chưa cần máy khách):
+
+![rest](anhchupminhchung/edusubmit-buoc4-rest.png)
+
+Terminal 1 – máy chủ in khi đẩy thông báo:
+
+![may chu](anhchupminhchung/edusubmit-buoc4-maychu.png)
+
+Thấy: POST trả `received` ngay; GET ngay lập tức → `received`, sau ~1,5 giây → `processing`, sau ~4 giây → `graded`; `updatedAt` tăng dần. Máy chủ in `[Push] submission:... -> processing` và `-> graded`.
+
+Giải thích:
+- `IHubContext` là "loa phát" của hub dùng được **ngoài** hub (trong tác vụ nền). Không truyền đối tượng hub vào tác vụ nền được vì hub chỉ sống trong một lời gọi.
+- **Lưu trước, đẩy sau**: ai đọc REST ngay khi nhận tin đều thấy đúng trạng thái.
+- Chỉ gửi 3 trường (mã lượt nộp, trạng thái, thời điểm), không gửi cả `SubmissionDto` (câu ①, ③).
+- REST luôn biết trạng thái đúng; SignalR chỉ giúp máy khách biết **sớm** hơn mà không phải hỏi lại. Hệ thật sẽ thay `Task.Delay` bằng hàng đợi + worker (Bài 6).
