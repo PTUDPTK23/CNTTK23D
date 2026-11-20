@@ -1,0 +1,46 @@
+﻿@host = http://localhost:5000
+### 1. GET / (200 OK)
+GET {{host}}/
+
+### 2. GET danh sach bai tap (200 OK)
+GET {{host}}/api/assignments
+
+### 3. POST tao luot nop hop le (201 Created + Location, status = received)
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200351",
+  "repositoryUrl": "https://github.com/luuthanh205/CNTTK23D"
+}
+
+### 4. GET doc lai trang thai luot nop: received -> processing -> graded (200 OK)
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. POST thieu du lieu (400 Bad Request)
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "",
+  "repositoryUrl": ""
+}
+
+### 6. POST bai tap khong ton tai (404 Not Found)
+POST {{host}}/api/assignments/999/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200351",
+  "repositoryUrl": "https://github.com/luuthanh205/CNTTK23D"
+}
+
+### 7. GET id khong ton tai (404 Not Found)
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. POST negotiate dung duong dan (200 OK + connectionId)
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. POST negotiate sai duong dan hub (404 Not Found)
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
