@@ -110,6 +110,12 @@ static async Task UpdateStatusAsync(Guid submissionId, string status, List<Submi
         if (index < 0)
             return;
 
+        if (status == "graded" &&
+            !submissions[index].RepositoryUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            status = "failed";
+        }
+
         updated = submissions[index] with { Status = status, UpdatedAt = DateTimeOffset.UtcNow };
         submissions[index] = updated;
     }

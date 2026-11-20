@@ -229,3 +229,29 @@ Tệp `RealtimeSubmissionSystem/requests.http` chứa 9 yêu cầu. Ca 3 đặt 
 ![Ca 8 — Bắt tay SignalR — 200](docs/edusubmit-buoc8-ca8.png)
 
 ![Ca 9 — Sai đường dẫn hub — 404](docs/edusubmit-buoc8-ca9.png)
+
+## Trả lời ba câu hỏi đầu giờ
+
+1. **Máy chủ có thể chủ động báo không?** Có. Khi máy khách đã mở kết nối SignalR, máy chủ có thể gửi thông báo tới nhóm bằng `Clients.Group(...).SendAsync(...)`; nếu gửi từ ngoài hub thì dùng `IHubContext`.
+2. **REST và SignalR chia việc thế nào?** REST tạo và đọc tài nguyên, trả về mã trạng thái rõ ràng. SignalR đẩy các thay đổi sau yêu cầu ban đầu để máy khách biết sớm; SignalR không thay thế REST.
+3. **Đứt mạng đúng lúc báo graded?** Máy khách có thể bỏ lỡ thông báo. `WithAutomaticReconnect()` có thể kết nối lại với `ConnectionId` mới; máy khách cần gọi `WatchSubmission` lại để vào nhóm và gửi `GET /api/submissions/{id}` để đọc trạng thái cuối từ REST. Việc theo dõi lại và đọc REST cần được lập trình, không tự xảy ra chỉ nhờ bật reconnect.
+
+## Bài tập vận dụng EduSubmit
+
+### Bài tập 2 – Trạng thái failed
+
+Máy chủ chuyển lượt nộp có `RepositoryUrl` không bắt đầu bằng `https://` sang `failed` sau trạng thái `processing`. Client nhận `failed` sẽ in cảnh báo màu đỏ và đọc lại trạng thái bằng REST. Đường dẫn HTTPS tiếp tục cho trạng thái `graded`.
+
+### Bài tập 3 – Theo dõi hai lượt nộp
+
+Chạy client với tham số `--two` để tạo lượt nộp `SV001` với URL HTTPS và `SV002` với URL HTTP. Hai lượt nộp được theo dõi qua cùng một `HubConnection`. Mỗi ID có một `TaskCompletionSource` trong `ConcurrentDictionary` để chờ trạng thái cuối riêng.
+
+Kết quả kiểm tra: SV001 nhận `processing` → `graded`, REST trả `graded`. SV002 nhận `processing` → `failed`, client in cảnh báo, REST trả `failed`. Hai ID và các thông báo tương ứng không bị trộn lẫn. Build thành công 0 lỗi.
+
+![Máy chủ theo dõi hai lượt nộp và gửi trạng thái](docs/edusubmit-baitap2-3-server.png)
+
+![Máy khách nhận graded, failed và cảnh báo](docs/edusubmit-baitap2-3-client.png)
+
+### Bài tập 4 – Chạy máy khách khi API tắt
+
+Khi chạy client lúc API không hoạt động, `StartAsync` ném `HttpRequestException` do kết nối bị từ chối. `WithAutomaticReconnect` xử lý mất kết nối sau khi đã kết nối thành công. Để chạy lại client, khởi động API trước.
