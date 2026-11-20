@@ -292,3 +292,51 @@ Trang thai doc lai bang REST: graded
 Thấy: 2 dòng "Thong bao SignalR" cách nhau 2 giây, đến từ máy chủ mà máy khách **không hề hỏi**; máy khách tự thoát sau khi đọc lại `graded`. Máy chủ in `[Hub] ... theo doi submission:...` → `[Push] ... processing` → `[Push] ... graded`.
 
 Giải thích: thứ tự đúng là **nghe → nối → tạo → theo dõi → đọc lại** (`On` → `StartAsync` → POST → `WatchSubmission(id)` → GET). `WatchSubmission` chỉ gọi được sau POST vì cần id. Trạng thái cuối luôn lấy từ REST (quy tắc vàng) – push để nhanh, REST để chắc.
+
+## EduSubmit – Bước 7: năm thí nghiệm phân tán
+
+Dự đoán (ghi TRƯỚC khi chạy):
+
+| # | Thí nghiệm | Dự đoán |
+|---|---|---|
+| 1 | Chạy 2 máy khách SV001 và SV002 cùng lúc | Mỗi máy khách chỉ nhận thông báo của lượt nộp mình vừa tạo, không thấy của người kia |
+| 2 | Chạy máy khách khi máy chủ chưa chạy | `HttpRequestException` không kết nối được, dừng ngay ở `StartAsync` |
+| 3 | Sửa `WithUrl` thành `/hub/submissions` | Lỗi `404 (Not Found)` ở bước negotiate |
+| 4 | Sửa `On("SubmissionStatusChanged")` thành `On("SubmissionStatusChange")` | Không có lỗi, không có dòng "Thong bao SignalR"; sau 10 giây in "Qua thoi gian cho thong bao graded."; REST vẫn đọc ra `graded` |
+| 5 | Chờ 4 giây rồi mới gọi `WatchSubmission` | Không nhận thông báo nào (đã chấm xong trước khi vào nhóm); hết 10 giây; REST đọc ra `graded` |
+
+Kết quả chạy thật:
+
+Thí nghiệm 1 – hai máy khách SV001 (trái) và SV002 (phải) cùng lúc:
+
+![tn1](anhchupminhchung/edusubmit-tn1-hai-may-khach.png)
+
+![tn1 may chu](anhchupminhchung/edusubmit-tn1-maychu.png)
+
+Thí nghiệm 2 – máy chủ chưa chạy:
+
+![tn2](anhchupminhchung/edusubmit-tn2-maychu-tat.png)
+
+Thí nghiệm 3 – sai đường dẫn `/hub/submissions`:
+
+![tn3](anhchupminhchung/edusubmit-tn3-sai-hub.png)
+
+Thí nghiệm 4 – sai tên sự kiện `SubmissionStatusChange`:
+
+![tn4](anhchupminhchung/edusubmit-tn4-sai-ten.png)
+
+Thí nghiệm 5 – chờ 4 giây rồi mới `WatchSubmission` (máy khách, rồi máy chủ):
+
+![tn5](anhchupminhchung/edusubmit-tn5-watch-muon.png)
+
+![tn5 may chu](anhchupminhchung/edusubmit-tn5-maychu.png)
+
+| # | Dự đoán | Kết quả thật | Đúng/Sai | Giải thích |
+|---|---|---|---|---|
+| 1 | Mỗi máy khách chỉ thấy lượt nộp của mình | SV001 chỉ nhận thông báo của `931300b7`, SV002 chỉ nhận của `ae5217e5`; máy chủ in 2 dòng `[Hub] ... theo doi` với 2 nhóm khác nhau | Đúng | Nhóm `submission:{id}` tách người nhận: máy chủ chỉ đẩy tới kết nối đã `WatchSubmission` đúng id. Riêng tư và không tốn băng thông như `Clients.All`. |
+| 2 | `HttpRequestException` không kết nối được | `HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:5000)` | Đúng | `StartAsync` gọi negotiate tới cổng 5000 nhưng không có tiến trình nào nghe. Lần nối **đầu tiên** không được tự thử lại; `WithAutomaticReconnect` chỉ cứu kết nối đã mở. |
+| 3 | 404 ở bước negotiate | `HttpRequestException: Response status code does not indicate success: 404 (Not Found)` tại `HttpConnection.NegotiateAsync` | Đúng | Máy chủ chỉ `MapHub` ở `/hubs/submissions`; `/hub/submissions/negotiate` không có tuyến. Đường dẫn `WithUrl` phải khớp `MapHub`. |
+| 4 | Không lỗi, hết 10 giây, REST ra graded | Không có lỗi, **không có dòng "Thong bao SignalR"**; in `Qua thoi gian cho thong bao graded.`; `Trang thai doc lai bang REST: graded` | Đúng | Máy chủ vẫn gửi `"SubmissionStatusChanged"` nhưng máy khách nghe `"SubmissionStatusChange"`; SignalR bỏ qua thông điệp không ai đăng ký, không báo lỗi. Sai tên chiều xuống = **im lặng**. Nhờ bước GET đọc lại nên vẫn có trạng thái đúng. |
+| 5 | Không nhận tin nào, REST ra graded | Không có dòng "Thong bao SignalR", hết 10 giây; REST đọc ra `graded`. Máy chủ in `[Push] processing`, `[Push] graded` **trước** `[Hub] ... theo doi` | Đúng | Chấm xong sau 3 giây nhưng máy khách vào nhóm sau 4 giây: tin đã gửi cho nhóm lúc chưa có ai → **lỡ tin**, SignalR không lưu để gửi lại. **REST là nguồn sự thật**: luôn đọc lại bằng GET khi kết thúc hoặc khi nối lại. |
+
+Bài học chung: thông điệp thời gian thực có thể bị lỡ. Thiết kế đúng = **push để nhanh + REST để chắc**. Sau mỗi thí nghiệm code đã được trả về như cũ, build `0 Error(s)`.
