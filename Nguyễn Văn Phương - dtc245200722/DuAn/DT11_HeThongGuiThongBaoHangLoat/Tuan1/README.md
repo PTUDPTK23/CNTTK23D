@@ -84,6 +84,83 @@ Trạng thái chiến dịch: `Draft → Running → Completed / CompletedWithFa
 
 ## 7. Kết quả Tuần 1
 
-- Phân tích yêu cầu đề tài, chọn MEP Queue-based.
-- Thiết kế kiến trúc, dữ liệu và API như trên.
-- Dựng khung solution .NET 10 (Campaign.Api, Notification.Worker, Admin.Web, Notification.Shared), Dockerfile cho từng service và `docker-compose.yml`.
+Giai đoạn hiện tại: **Bài 1–2** (Minimal API + RESTful API + client console). Hàng đợi RabbitMQ, Notification Worker và cơ sở dữ liệu được bổ sung ở các tuần sau.
+
+- Phân tích yêu cầu đề tài, chọn MEP Queue-based; thiết kế kiến trúc, dữ liệu và API như trên.
+- Hiện thực lát cắt đầu tiên: API quản lý chiến dịch và máy khách console gọi API qua HTTP.
+
+### Thành phần
+
+- `src/Campaign.Api`: Web API (ASP.NET Core Minimal API, .NET 10), lưu dữ liệu trong bộ nhớ.
+- `src/Campaign.Client`: ứng dụng console gọi API qua HTTP.
+
+### Cách chạy
+
+```
+dotnet build NotificationSystem.slnx
+```
+
+Terminal 1:
+
+```
+dotnet run --project src/Campaign.Api --urls http://localhost:5000
+```
+
+Terminal 2:
+
+```
+dotnet run --project src/Campaign.Client -- http://localhost:5000
+```
+
+### Endpoint
+
+| Method | URI | Kết quả |
+| --- | --- | --- |
+| GET | `/` | 200, API đang chạy |
+| GET | `/contacts` | 200, danh bạ người nhận |
+| POST | `/campaigns` | 201 + Location, hoặc 400 `INVALID_CAMPAIGN` (kèm lỗi từng trường) |
+| GET | `/campaigns/{id}` | 200, hoặc 404 `CAMPAIGN_NOT_FOUND` |
+| GET | `/campaigns?channel=...` | 200, hoặc 400 `INVALID_CHANNEL` |
+
+### Kết quả chạy máy khách
+
+```
+=== 2. Tạo chiến dịch ===
+  Status: 201 Created
+  Location: /campaigns/dca4d7c0-e674-4080-8519-399bde1dbb2e
+  Chiến dịch dca4d7c0-… | Thông báo lịch thi | Kênh: Email | Trạng thái: Draft
+    - Người nhận 01 <nguoinhan01@example.com>
+    - Người nhận 02 <nguoinhan02@example.com>
+    - Nguyễn Văn An <an@example.com>
+
+=== 5. Gửi chiến dịch sai (mong đợi 400) ===
+  Status: 400 BadRequest
+  Lỗi 400 - INVALID_CAMPAIGN: Dữ liệu chiến dịch không hợp lệ.
+    name: Thiếu tên chiến dịch.
+    subject: Thiếu tiêu đề.
+    content: Thiếu nội dung thông báo.
+    contactIds: Không có liên hệ 99 trong danh bạ.
+    recipients: Địa chỉ không hợp lệ với kênh Email: khong-phai-email
+
+=== 6. Tra chiến dịch không tồn tại (mong đợi 404) ===
+  Lỗi 404 - CAMPAIGN_NOT_FOUND: Không tìm thấy chiến dịch 34fd292f-….
+
+=== 7. Gọi sai route (mong đợi 404 không có ApiError) ===
+  GET /campaigns/abc → 404 NotFound
+  Lỗi 404 (không có ApiError trong phản hồi)
+```
+
+### Bảng phá thử
+
+| # | Thao tác | Mong đợi | Thực tế | Giải thích |
+| --- | --- | --- | --- | --- |
+| 1 | `POST /campaigns` hợp lệ | 201 + Location | 201, `Location: /campaigns/{id}` | Tạo tài nguyên mới, Location chỉ URI đọc lại |
+| 2 | POST thiếu tên, tiêu đề, nội dung, liên hệ không có, địa chỉ sai | 400 | 400 `INVALID_CAMPAIGN`, đủ 5 lỗi theo trường | Kiểm tra tại biên, gom mọi lỗi để client sửa một lần |
+| 3 | `GET /campaigns/{guid không tồn tại}` | 404 + ApiError | 404 `CAMPAIGN_NOT_FOUND` | Handler chạy, không tìm thấy tài nguyên |
+| 4 | `GET /campaigns/abc` | 404 rỗng | 404, không có body | Không khớp ràng buộc `{id:guid}`, framework trả 404 trước handler |
+| 5 | `GET /campaigns?channel=Fax` | 400 | 400 `INVALID_CHANNEL` | Điều kiện lọc trong query string cũng phải kiểm tra |
+| 6 | `PUT /campaigns/{id}` | 405 | 405, `Allow: GET` | URI tồn tại, chỉ phương thức không được hỗ trợ |
+| 7 | Bỏ header `Content-Type` | 415 | 415 | Framework không biết body là JSON |
+| 8 | Body JSON hỏng | 400 | 400, không có body | Framework không đọc được body |
+| 9 | Tắt API rồi chạy client | Lỗi kết nối | `No connection could be made… (localhost:5000)` | Lỗi mạng: không có phản hồi HTTP, khác lỗi 4xx |
+| 10 | Dừng rồi chạy lại API, đọc chiến dịch cũ | 404 | 404 `CAMPAIGN_NOT_FOUND` | Dữ liệu nằm trong `List<T>` của tiến trình, dừng là mất (thêm cơ sở dữ liệu ở tuần sau) |
