@@ -62,3 +62,11 @@ Máy chủ chạy ở cổng 5000: `dotnet run --project src/Submission.Realtime
 | Sau ~4 giây | `graded` | 02:29:52.82 |
 
 Đúng thứ tự received → processing → graded ✓; máy chủ in `[Push] submission:… -> processing`, `-> graded`. REST luôn biết trạng thái đúng; SignalR chỉ giúp máy khách biết sớm hơn. Ảnh: `rs-b4-may-chu.png`, `rs-b4-rest-doi-trang-thai.png`.
+
+## Bước 5: máy khách mở hai kênh (slide 55)
+
+- Kênh 1 REST: `HttpClient { BaseAddress = http://localhost:5000 }`. Kênh 2 SignalR: `HubConnectionBuilder().WithUrl(".../hubs/submissions").WithAutomaticReconnect()`. Một URL gốc cho cả hai.
+- `On<SubmissionStatusMessage>("SubmissionStatusChanged", …)` đăng ký **trước** `StartAsync`; SignalR tự chuyển JSON thành record (record khai báo giống máy chủ ở cuối tệp).
+- `TaskCompletionSource gradedNotification`: "cái chuông", hoàn tất khi nhận `graded` (`TrySetResult`).
+
+Kiểm tra: máy chủ đang chạy, máy khách in `Da ket noi SignalR.` ✓ — ảnh `rs-b5-may-chu.png`, `rs-b5-client-ket-noi.png`.
