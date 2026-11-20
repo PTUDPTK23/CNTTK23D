@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.SignalR;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 var assignments = new List<AssignmentDto>
@@ -80,6 +83,7 @@ app.MapDelete("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
     }
 });
 
+app.MapHub<SubmissionHub>("/hubs/submissions");
 app.Run();
 
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
@@ -87,3 +91,20 @@ record ApiError(string Code, string Message);
 record CreateSubmissionRequest(string StudentCode, string RepositoryUrl);
 record SubmissionDto(Guid Id, int AssignmentId, string StudentCode, string RepositoryUrl,
     string Status, DateTimeOffset ReceivedAt, DateTimeOffset UpdatedAt);
+
+sealed class SubmissionHub : Hub
+{
+    public Task WatchSubmission(string submissionId)
+    {
+        return Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            SubmissionGroups.ForSubmission(submissionId));
+    }
+}
+
+static class SubmissionGroups
+{
+    public static string ForSubmission(Guid id) => ForSubmission(id.ToString());
+
+    public static string ForSubmission(string id) => $"submission:{id}";
+}

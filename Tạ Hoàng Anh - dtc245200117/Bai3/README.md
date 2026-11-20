@@ -131,3 +131,15 @@ Build thành công với 0 lỗi. POST hợp lệ trả `201 Created`, có `Loca
 ![Terminal 1 chạy Submission.RealtimeApi trên cổng 5000](docs/edusubmit-buoc2-server.png)
 
 ![Terminal 2 nhận 201 Created cùng trạng thái received và updatedAt](docs/edusubmit-buoc2-post.png)
+
+### Bước 3 – SubmissionHub và nhóm theo lượt nộp
+
+Đăng ký SignalR trước `builder.Build()` và ánh xạ `SubmissionHub` tại `/hubs/submissions`. Sau khi có ID từ REST, máy khách có thể gọi `WatchSubmission(id)` để đưa kết nối hiện tại vào nhóm `submission:{id}`. `SubmissionGroups` tạo tên nhóm theo cùng quy ước cho ID dạng `Guid` hoặc chuỗi.
+
+Build thành công với 0 lỗi. POST negotiate tại `/hubs/submissions/negotiate` trả `connectionId`. Cùng yêu cầu gửi đến `/hub/submissions/negotiate` trả `404 Not Found`. REST `GET /api/assignments` vẫn trả `200 OK`.
+
+Gửi theo nhóm giới hạn thông báo trạng thái đến các kết nối đang theo dõi lượt nộp. Điều này giúp hạn chế chia sẻ dữ liệu sang các kết nối ngoài nhóm và giảm số bản tin phải truyền.
+
+![Terminal 1 chạy EduSubmit realtime trên cổng 5000](docs/edusubmit-buoc3-server.png)
+
+![Terminal 2 nhận connectionId ở đường dẫn đúng và 404 ở đường dẫn sai](docs/edusubmit-buoc3-negotiate.png)
