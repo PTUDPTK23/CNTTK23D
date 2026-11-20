@@ -174,3 +174,17 @@ Trong PowerShell 7 ở cửa sổ thứ hai, gửi một lượt nộp mẫu:
     curl.exe -i http://localhost:5000/api/assignments/1/submissions --json '{"studentCode":"dtc245200599","repositoryUrl":"https://github.com/hoangsondu7-ops/CNTTK23D"}'
 
 Kiểm tra thực tế bằng curl trên cổng 5000: POST trả 201 Created, Location và JSON chứa status là received, có updatedAt. GET địa chỉ trong Location trả 200 và cùng dữ liệu. Bài tập không tồn tại hoặc lượt nộp không tồn tại trả 404. Bài tập đã đóng hoặc dữ liệu thiếu trả 400.
+
+## Trả lời 3 câu hỏi đầu giờ
+
+### 1. Máy chủ có thể chủ động báo không?
+
+Có. Máy khách cần mở một kết nối lâu dài trước (SignalR thường ưu tiên WebSocket). Máy chủ gửi sự kiện qua `Clients.Group(...).SendAsync(...)`; khi phát thông báo từ ngoài Hub, dùng `IHubContext<SubmissionHub>`. Nhóm `submission:{id}` giới hạn thông báo vào đúng các client đang theo dõi lượt nộp đó.
+
+### 2. REST và SignalR chia việc thế nào?
+
+REST tạo và đọc tài nguyên với mã trạng thái HTTP rõ ràng. SignalR đẩy các thay đổi phát sinh sau yêu cầu ban đầu đến client đang kết nối. SignalR bổ sung thông báo thời gian thực, không thay thế REST; client đọc lại trạng thái bằng REST để chốt dữ liệu.
+
+### 3. Đứt mạng đúng lúc báo `graded` thì sao?
+
+Client có thể lỡ thông báo. `WithAutomaticReconnect` có thể mở lại kết nối sau khi kết nối ban đầu đã thành công, nhưng kết nối mới có `ConnectionId` mới nên client cần tham gia lại nhóm lượt nộp. Sau đó gọi `GET /api/submissions/{id}` để lấy trạng thái hiện tại. REST là nguồn dữ liệu chắc chắn; thông báo SignalR chỉ giúp cập nhật nhanh.
