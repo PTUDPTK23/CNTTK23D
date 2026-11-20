@@ -215,3 +215,13 @@ dotnet build
 ![build](anhchupminhchung/edusubmit-buoc1-build.png)
 
 Thấy: `Build succeeded`, `0 Error(s)`. Giải thích: máy chủ là template `web` (REST Bài 2 + hub), máy khách là `console` + gói SignalR Client (HttpClient + HubConnection).
+
+## EduSubmit – Bước 2: REST của Bài 2 + UpdatedAt + khóa dữ liệu
+
+Code `src/Submission.RealtimeApi/Program.cs`: giữ nguyên REST Bài 2 (`GET /api/assignments`, `POST /api/assignments/{id}/submissions` với 404 → 400 CLOSED → 400 INVALID → 201, `GET /api/submissions/{id}`, `ApiError`), thêm trường `UpdatedAt` vào `SubmissionDto` và `lock (submissionsLock)` khi đọc/ghi danh sách.
+
+![post](anhchupminhchung/edusubmit-buoc2-post.png)
+
+Thấy: `201 Created`, header `Location: /api/submissions/{id}`, body có `"status":"received"` và `"updatedAt"`.
+
+Giải thích: `UpdatedAt` là thời điểm đổi trạng thái gần nhất, máy khách so sánh để biết tin nào mới hơn. `lock` vì ở bước 4 tác vụ chấm nền và các yêu cầu HTTP cùng sửa danh sách; chỉ một luồng được đọc/ghi tại một thời điểm. REST là **nguồn sự thật** (câu ④).
