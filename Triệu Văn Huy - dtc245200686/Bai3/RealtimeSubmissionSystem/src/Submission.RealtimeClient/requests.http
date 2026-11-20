@@ -1,0 +1,47 @@
+@host = http://localhost:5000
+
+### 1. Kiểm tra trạng thái dịch vụ (Mong đợi: 200 OK)
+GET {{host}}/
+
+### 2. Lấy danh sách bài tập (Mong đợi: 200 OK)
+GET {{host}}/api/assignments
+
+### 3. Tạo lượt nộp hợp lệ (Mong đợi: 201 Created + Location, status = received)
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "SV001",
+  "repositoryUrl": "https://example.com/sv001/signalr"
+}
+
+### 4. Đọc lại chi tiết lượt nộp vừa tạo (Mong đợi: 200 OK, status đổi received -> processing -> graded)
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Tạo lượt nộp thiếu dữ liệu (Mong đợi: 400 Bad Request - INVALID_SUBMISSION)
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "",
+  "repositoryUrl": ""
+}
+
+### 6. Tạo lượt nộp cho bài tập không tồn tại (Mong đợi: 404 Not Found - ASSIGNMENT_NOT_FOUND)
+POST {{host}}/api/assignments/99/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "SV001",
+  "repositoryUrl": "https://example.com/sv001/signalr"
+}
+
+### 7. Đọc chi tiết lượt nộp không tồn tại / id rỗng (Mong đợi: 404 Not Found)
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. Bắt tay SignalR hợp lệ (Mong đợi: 200 OK + connectionId)
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Sai đường dẫn hub SignalR (Mong đợi: 404 Not Found)
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
