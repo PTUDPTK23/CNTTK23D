@@ -29,7 +29,9 @@ app.MapGet("/api/assignments", () => Results.Ok(assignments));
 // POST /api/assignments/{assignmentId:int}/submissions : nộp bài
 // Kiểm tra theo thứ tự: tồn tại (404) → còn mở (400) → hợp lệ (400) → tạo (201)
 app.MapPost("/api/assignments/{assignmentId:int}/submissions",
-    (int assignmentId, CreateSubmissionRequest request) => {
+    (int assignmentId,
+     CreateSubmissionRequest request,
+     IHubContext<SubmissionHub> hubContext) => {
     var assignment = assignments.FirstOrDefault(item => item.Id == assignmentId);
     if (assignment is null)
         return Results.NotFound(new ApiError("ASSIGNMENT_NOT_FOUND", "Khong tim thay bai tap."));
@@ -52,6 +54,9 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions",
         UpdatedAt: now);
     lock (submissionsLock) { submissions.Add(submission); }
 
+    // Khởi động chấm bài ở nền, KHÔNG chờ: POST trả 201 ngay
+    _ = SimulateGradingAsync(submission.Id, submissions, submissionsLock, hubContext);
+
     return Results.Created($"/api/submissions/{submission.Id}", submission);
 });
 
@@ -69,6 +74,38 @@ app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) => {
 app.MapHub<SubmissionHub>("/hubs/submissions");   // trước app.Run()
 
 app.Run();
+
+// Giả lập chấm bài: received → (1 giây) processing → (2 giây) graded
+static async Task SimulateGradingAsync(Guid id, List<SubmissionDto> list,
+    object gate, IHubContext<SubmissionHub> hub)
+{
+    await Task.Delay(TimeSpan.FromSeconds(1));
+    await UpdateStatusAsync(id, "processing", list, gate, hub);
+    await Task.Delay(TimeSpan.FromSeconds(2));
+    await UpdateStatusAsync(id, "graded", list, gate, hub);
+}
+
+// Cập nhật dữ liệu trước, rồi mới đẩy thông báo tới đúng nhóm
+static async Task UpdateStatusAsync(Guid id, string status,
+    List<SubmissionDto> list, object gate, IHubContext<SubmissionHub> hub)
+{
+    SubmissionDto? updated = null;
+    lock (gate) {                                  // ① cập nhật dữ liệu
+        var i = list.FindIndex(s => s.Id == id);
+        if (i >= 0) {
+            updated = list[i] with { Status = status, UpdatedAt = DateTimeOffset.UtcNow };
+            list[i] = updated;
+        }
+    }
+    if (updated is null) return;
+
+    var msg = new SubmissionStatusMessage(updated.Id, updated.Status,
+                                          updated.UpdatedAt);   // ② dữ liệu tối thiểu
+    var group = SubmissionGroups.ForSubmission(id);
+    await hub.Clients.Group(group)
+             .SendAsync("SubmissionStatusChanged", msg);        // ③ đẩy đúng nhóm
+    Console.WriteLine($"[Push] {group} -> {status}");
+}
 
 // Hub mỏng: chỉ đưa kết nối vào nhóm submission:{id}
 sealed class SubmissionHub : Hub
@@ -95,3 +132,4 @@ record SubmissionDto(Guid Id, int AssignmentId, string StudentCode,
     string RepositoryUrl, string Status, DateTimeOffset ReceivedAt,
     DateTimeOffset UpdatedAt);
 record ApiError(string Code, string Message);
+record SubmissionStatusMessage(Guid SubmissionId, string Status, DateTimeOffset UpdatedAt);
