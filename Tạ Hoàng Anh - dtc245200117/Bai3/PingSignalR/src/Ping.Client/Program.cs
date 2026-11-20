@@ -9,11 +9,18 @@ await using var connection = new HubConnectionBuilder()
     .Build();
 
 connection.On<string>("EchoResponse", message => Console.WriteLine($"[Echo] {message}"));
+connection.On<string>("BroadcastMessage", message => Console.WriteLine($"[Broadcast] {message}"));
+connection.On<string>("GroupMessage", message => Console.WriteLine($"[Group] {message}"));
 
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi.");
 
 await connection.InvokeAsync("Echo", $"Xin chao SignalR tu {name}");
+
+const string groupName = "lop-hoc-01";
+await connection.InvokeAsync("JoinGroup", groupName);
+await connection.InvokeAsync("SendToGroup", groupName, $"Thong bao nhom tu {name}");
+await connection.InvokeAsync("Broadcast", $"Xin chao tat ca tu {name}");
 
 Console.WriteLine("Dang cho thong diep... Nhan Enter de thoat.");
 Console.ReadLine();

@@ -56,3 +56,21 @@ Build thành công với 0 cảnh báo và 0 lỗi. Máy khách in `[Echo] Echo:
 ![Terminal 1 chạy máy chủ Ping.Api trên cổng 5200](docs/buoc4-server.png)
 
 ![Terminal 2 nhận Echo từ máy chủ SignalR](docs/buoc4-echo.png)
+
+## Bước 5 – Phát rộng và gửi theo nhóm
+
+`Echo` dùng `Clients.Caller` để trả lời kết nối đã gọi. `SendToGroup` dùng `Clients.Group` để gửi đến các thành viên, còn `Broadcast` dùng `Clients.All` để gửi đến mọi kết nối đang mở. `JoinGroup` thêm kết nối vào nhóm rồi báo cho nhóm biết.
+
+Chạy theo thứ tự dưới đây, từ thư mục `Bai3/PingSignalR`:
+
+| Terminal | Lệnh |
+| --- | --- |
+| 1 – Máy chủ | `dotnet run --project src/Ping.Api --urls http://localhost:5200` |
+| 2 – An | `dotnet run --project src/Ping.Client -- http://localhost:5200 An` |
+| 3 – Bình | `dotnet run --project src/Ping.Client -- http://localhost:5200 Binh` |
+
+Build thành công với 0 cảnh báo và 0 lỗi. Trong lần kiểm tra hai máy khách, An nhận `[Group] Thong bao nhom tu Binh` và `[Broadcast] Xin chao tat ca tu Binh`. Echo của Bình chỉ hiện ở cửa sổ Bình. Bình vào sau nên các tin An gửi trước đó không xuất hiện ở cửa sổ Bình.
+
+![Terminal 2 của An nhận tin nhóm và tin phát rộng từ Bình](docs/buoc5-nhom.png)
+
+![Terminal 3 hiển thị kết quả của Bình](docs/buoc5-binh.png)
