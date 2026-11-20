@@ -70,3 +70,24 @@ Máy chủ chạy ở cổng 5000: `dotnet run --project src/Submission.Realtime
 - `TaskCompletionSource gradedNotification`: "cái chuông", hoàn tất khi nhận `graded` (`TrySetResult`).
 
 Kiểm tra: máy chủ đang chạy, máy khách in `Da ket noi SignalR.` ✓ — ảnh `rs-b5-may-chu.png`, `rs-b5-client-ket-noi.png`.
+
+## Bước 6: tạo bằng REST, theo dõi bằng SignalR, chốt bằng REST (slide 56–57)
+
+Thứ tự trong máy khách: ① `GET /api/assignments` → ② `POST …/submissions` (kiểm tra 201 trước khi đọc body, lỗi thì in `ApiError`) → ③ `InvokeAsync("WatchSubmission", id)` → ④ `Task.WhenAny(chuông graded, 10 giây)` → ⑤ `GET /api/submissions/{id}` đọc lại. Máy khách tự thoát sau khi nhận `graded`.
+
+**Kết quả máy khách (8 dòng)** – `dotnet run --project src/Submission.RealtimeClient -- http://localhost:5000 SV001`:
+
+```text
+Da ket noi SignalR.
+Chon bai tap: 1 - Bai tap REST API
+Da tao luot nop: 020c4d58-118a-44b6-ac71-5802d310473e
+Trang thai REST ban dau: received
+Dang cho thong bao trang thai tu may chu...
+Thong bao SignalR: 020c4d58-118a-44b6-ac71-5802d310473e -> processing luc 09:32:23
+Thong bao SignalR: 020c4d58-118a-44b6-ac71-5802d310473e -> graded luc 09:32:25
+Trang thai doc lai bang REST: graded
+```
+
+**Máy chủ:** `[Hub] sr3n_2uM theo doi submission:020c4d58…` → `[Push] … -> processing` → `[Push] … -> graded`.
+
+Kiểm tra: đủ 8 dòng, 2 dòng "Thong bao SignalR" cách nhau 2 giây ✓. Hai cập nhật đến từ máy chủ mà máy khách không hề hỏi. Ảnh: `rs-b6-client-sv001.png`, `rs-b6-may-chu.png`.
