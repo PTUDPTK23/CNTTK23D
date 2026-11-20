@@ -67,7 +67,7 @@ if (delaySeconds > 0)
 await connection.InvokeAsync("WatchSubmission", created.Id.ToString());
 Console.WriteLine("Đang theo dõi trạng thái bằng SignalR...");
 
-await Task.WhenAny(finalStatus.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+await Task.WhenAny(finalStatus.Task, Task.Delay(TimeSpan.FromSeconds(5)));
 var latest = await http.GetFromJsonAsync<SubmissionDto>($"/api/submissions/{created.Id}");
 if (latest is null)
 {
