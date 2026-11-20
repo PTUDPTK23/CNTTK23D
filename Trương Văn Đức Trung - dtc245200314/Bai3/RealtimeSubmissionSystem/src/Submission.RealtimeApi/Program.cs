@@ -7,7 +7,16 @@ var app = builder.Build();
 
 var assignments = new[]
 {
-    new AssignmentDto(1, "Bai tap SignalR", "Theo doi trang thai bai nop theo thoi gian thuc.")
+    new AssignmentDto(
+        1,
+        "Bai tap SignalR",
+        "Nhan thong bao trang thai bai nop theo thoi gian thuc.",
+        true),
+    new AssignmentDto(
+        2,
+        "Bai tap REST API",
+        "On lai API assignment va submission.",
+        true)
 };
 var submissions = new List<SubmissionDto>();
 var submissionsLock = new object();
@@ -33,6 +42,9 @@ app.MapPost(
         var assignment = assignments.FirstOrDefault(item => item.Id == assignmentId);
         if (assignment is null)
             return Results.NotFound(new ApiError("ASSIGNMENT_NOT_FOUND", "Khong tim thay bai tap."));
+
+        if (!assignment.IsOpen)
+            return Results.BadRequest(new ApiError("ASSIGNMENT_CLOSED", "Bai tap da dong bai."));
 
         if (string.IsNullOrWhiteSpace(request.StudentCode) ||
             string.IsNullOrWhiteSpace(request.RepositoryUrl))
@@ -136,7 +148,7 @@ static async Task UpdateStatusAsync(
     Console.WriteLine($"[Push] {group} -> {status}");
 }
 
-record AssignmentDto(int Id, string Title, string Description);
+record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
 record CreateSubmissionRequest(string? StudentCode, string? RepositoryUrl);
 record SubmissionDto(
     Guid Id,

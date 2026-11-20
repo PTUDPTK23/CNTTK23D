@@ -3,14 +3,16 @@
 Mã sinh viên: dtc245200314  
 Sinh viên: Trương Văn Đức Trung
 
-Bài làm có hai solution: PingSignalR minh họa hub, các phạm vi gửi, nhóm và vòng đời kết nối; RealtimeSubmissionSystem kết hợp REST với SignalR để báo trạng thái chấm bài.
+Bài làm có hai solution: PingSignalR minh họa hub, các phạm vi gửi, nhóm và vòng đời kết nối; RealtimeSubmissionSystem kết hợp REST với SignalR để báo trạng thái chấm bài. Phần realtime được triển khai theo thứ tự trong hướng dẫn từng bước: dữ liệu và REST, hub và group, phát trạng thái nền, rồi client kết hợp hai kênh.
 
 ## Chạy bài
 
-Yêu cầu .NET SDK 10.0. Build hai solution:
+Yêu cầu .NET SDK 10.0. Có thể build từng project:
 
-    dotnet build PingSignalR/PingSignalR.slnx
-    dotnet build RealtimeSubmissionSystem/RealtimeSubmissionSystem.slnx
+    dotnet build PingSignalR/src/Ping.Api/Ping.Api.csproj
+    dotnet build PingSignalR/src/Ping.Client/Ping.Client.csproj
+    dotnet build RealtimeSubmissionSystem/src/Submission.RealtimeApi/Submission.RealtimeApi.csproj
+    dotnet build RealtimeSubmissionSystem/src/Submission.RealtimeClient/Submission.RealtimeClient.csproj
 
 ### PingSignalR
 
@@ -28,6 +30,8 @@ Mở terminal khác. Client kết nối, gọi Echo rồi chờ Enter để tho�
 
 ### EduSubmit realtime
 
+API có hai bài tập mẫu. Mỗi bài có `IsOpen`; API chỉ nhận bài khi mã bài tồn tại, bài đang mở, và request có đủ `StudentCode` cùng `RepositoryUrl`. Bài nộp được lưu trong bộ nhớ và có trạng thái ban đầu `received`.
+
 Chạy API ở cổng 5000:
 
     dotnet run --project RealtimeSubmissionSystem/src/Submission.RealtimeApi --urls http://localhost:5000
@@ -37,6 +41,8 @@ Chạy client ở terminal khác:
     dotnet run --project RealtimeSubmissionSystem/src/Submission.RealtimeClient -- http://localhost:5000 DTC245200314 https://github.com/dtc245200314-del/CNTTK23D
 
 Client đăng ký sự kiện trước khi mở kết nối, tạo lượt nộp qua REST, gọi WatchSubmission để vào nhóm của lượt nộp, chờ processing và graded, rồi đọc trạng thái cuối qua GET. Để tạo hai lượt nộp trên một kết nối, thêm --watch-two. Để làm cho lượt nộp thứ hai thất bại và so sánh hai nhóm, thêm --watch-two --fail-second. Tùy chọn --late-watch chờ bốn giây trước khi vào nhóm để minh họa rằng SignalR không phát lại tin cũ.
+
+Luồng mẫu: `received` ngay sau POST, `processing` sau khoảng 1 giây, rồi `graded` sau thêm khoảng 2 giây. Server cập nhật bản ghi trước khi gửi `SubmissionStatusChanged` tới group `submission:{id}`; client đọc lại trạng thái có thẩm quyền qua REST.
 
 Trong VS Code, chọn các cấu hình `Submission.RealtimeApi - port 5000`, `Submission.RealtimeClient - EduSubmit` hoặc các cấu hình thí nghiệm trong `.vscode/launch.json`. Client cũng hỗ trợ `--wrong-hub-path` và `--wrong-event-name` để tái hiện hai lỗi tương ứng.
 

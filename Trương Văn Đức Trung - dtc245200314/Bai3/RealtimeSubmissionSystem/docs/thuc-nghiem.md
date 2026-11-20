@@ -17,7 +17,7 @@ Ngày chạy: 20/11/2026. API được khởi động trong VS Code ở `http://
 | Request | Mã HTTP | Kết quả |
 | --- | ---: | --- |
 | `GET /` | 200 | Dịch vụ đang chạy |
-| `GET /api/assignments` | 200 | Trả danh sách bài tập |
+| `GET /api/assignments` | 200 | Trả hai bài tập mẫu, mỗi bài có `IsOpen` |
 | `POST /api/assignments/1/submissions` hợp lệ | 201 | Có `Location` và status ban đầu `received` |
 | `GET /api/submissions/{id}` | 200 | Sau 4 giây trả status `graded` |
 | POST thiếu trường bắt buộc | 400 | Payload bị từ chối |
@@ -25,6 +25,8 @@ Ngày chạy: 20/11/2026. API được khởi động trong VS Code ở `http://
 | GET ID không tồn tại | 404 | Lượt nộp không tồn tại |
 | POST negotiate `/hubs/submissions` | 200 | SignalR negotiate thành công |
 | POST negotiate `/hub/submissions` | 404 | Đường dẫn sai |
+
+Theo hướng dẫn từng bước, `POST` còn kiểm tra bài tập có đang mở hay không trước khi xác thực các trường bắt buộc. Hai bài mẫu hiện được cấu hình mở để client chọn bài đầu tiên và chạy luồng nhận bài.
 
 ## Ảnh chụp
 

@@ -74,8 +74,8 @@ try
 
     var assignments = await http.GetFromJsonAsync<List<AssignmentDto>>("/api/assignments")
         ?? throw new InvalidOperationException("API khong tra ve danh sach bai tap.");
-    var assignment = assignments.FirstOrDefault()
-        ?? throw new InvalidOperationException("Danh sach bai tap dang rong.");
+    var assignment = assignments.FirstOrDefault(item => item.IsOpen)
+        ?? throw new InvalidOperationException("Khong co bai tap nao dang mo de nop.");
     Console.WriteLine($"Chon bai tap: {assignment.Id} - {assignment.Title}");
 
     var count = watchTwo ? 2 : 1;
@@ -146,7 +146,7 @@ catch (Exception exception)
     return 1;
 }
 
-record AssignmentDto(int Id, string Title, string Description);
+record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
 record CreateSubmissionRequest(string StudentCode, string RepositoryUrl);
 record SubmissionDto(
     Guid Id,
