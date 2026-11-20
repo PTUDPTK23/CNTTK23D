@@ -80,3 +80,17 @@ sealed class PingHub : Hub
 Thấy: build `0 Error(s)`; máy chủ chạy lại ở `http://localhost:5200`.
 
 Giải thích: mỗi phương thức `public` của hub là thứ máy khách gọi được qua `InvokeAsync("Echo", ...)`. Mẫu câu gửi: `Clients.<ai nhận>.SendAsync("<TÊN thông điệp>", dữ liệu)`. `Clients.Caller` chỉ gửi cho kết nối vừa gọi. Chưa test được bằng curl vì hub cần máy khách SignalR (bước 4). Sau mỗi lần sửa `Program.cs` phải Ctrl+C và chạy lại máy chủ, nếu không máy chủ vẫn chạy code cũ.
+
+## Bước 4: máy khách – Build → On → Start → Invoke
+
+Code `src/Ping.Client/Program.cs`: `HubConnectionBuilder().WithUrl(".../hubs/ping").WithAutomaticReconnect().Build()`, đăng ký `connection.On<string>("EchoResponse", ...)`, `await connection.StartAsync()`, rồi `await connection.InvokeAsync("Echo", ...)`.
+
+Terminal 1 – máy chủ (trái), Terminal 2 – máy khách An (phải):
+
+![echo](anh/buoc4-echo.png)
+
+Lệnh máy khách: `dotnet run --project src/Ping.Client -- http://localhost:5200 An`
+
+Thấy: `An da ket noi den PingApi.` rồi `[Echo] Echo: Xin chao SignalR tu An`.
+
+Giải thích: `InvokeAsync("Echo", ...)` gửi lời gọi LÊN hub (tên phải khớp tên phương thức C#). Hub gửi `"EchoResponse"` XUỐNG; hàm `On` đã đăng ký in ra dòng `[Echo]`. Hai chiều đi trên cùng một kết nối. `On` phải đăng ký trước `StartAsync` để không lỡ tin; chỉ gọi hub được sau khi `StartAsync` xong. Máy chủ chưa in gì thêm vì hub chưa ghi nhật ký (bước 6 thêm).
