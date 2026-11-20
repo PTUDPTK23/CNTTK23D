@@ -1,5 +1,7 @@
 # Nhật ký thực hành Bài 3: Giao tiếp thời gian thực với SignalR
-
+git add "Lưu Văn Thành - dtc245200351/Bai3/README.md"
+git commit -m "Bai3: cap nhat README.md va link anh"
+git push origin main
 ## Bước 1: Tạo solution và 2 project PingSignalR
 ![buoc1-build](anh/buoc1-build.png)
 - **Thấy:** `dotnet build` báo `Build succeeded` cho cả `Ping.Api` và `Ping.Client`.
@@ -48,3 +50,42 @@ git commit -m "Bai3 B2: cau hinh PingHub va kiem tra negotiate"
 | `Clients.Caller` | Chỉ kết nối vừa gọi phương thức trên Hub | Xác nhận đã đăng ký theo dõi lượt nộp |
 | `Clients.Group(ten)` | Toàn bộ thành viên đang ở trong nhóm | Cập nhật trạng thái chấm bài của nhóm `submission:{id}` |
 | `Clients.Client(id)` | Duy nhất một `ConnectionId` cụ thể | Gửi thông báo riêng cho một phiên làm việc |
+## Phần 3: Hệ thống nộp bài thời gian thực (EduSubmit Realtime)
+
+### 1. Kết quả chạy thực nghiệm & Kiểm thử
+* **Kiểm tra Build hệ thống (Bước 1):**
+  ![Build Solution](anh/edusubmit-b1-build.png)
+
+* **Kiểm tra POST tạo lượt nộp REST API (Bước 2):**
+  ![POST Submission](anh/edusubmit-b2-post.png)
+
+* **Kiểm tra SignalR Negotiate đúng & sai đường dẫn (Bước 3):**
+  ![SignalR Negotiate](anh/edusubmit-b3.png)
+
+* **Kiểm tra tác vụ nền đổi trạng thái & luồng máy khách thời gian thực (Bước 4 - 6):**
+  ![Client Realtime](anh/edusubmit-client.png)
+
+* **Kiểm thử tự động với `requests.http` (Bước 8):**
+  ![Requests HTTP](anh/edusubmit-requests.png)
+
+---
+
+### 2. Trả lời 3 câu hỏi đầu giờ
+1. **Tại sao không dùng mỗi REST mà cần thêm SignalR?**
+   * REST hoạt động theo cơ chế Request–Response (máy khách phải chủ động hỏi liên tục/polling để biết bài đã chấm xong chưa, gây tốn băng thông và có độ trễ). SignalR mở kênh kết nối hai chiều (WebSockets) giúp máy chủ chủ động đẩy (push) ngay lập tức sự kiện đổi trạng thái (`received` $\rightarrow$ `processing` $\rightarrow$ `graded`) tới đúng máy khách đang chờ.
+2. **Tại sao không bỏ REST để dùng mỗi SignalR?**
+   * REST chuẩn hóa tốt các thao tác CRUD tài nguyên qua HTTP (tạo lượt nộp `POST` trả về `201 Created` kèm `Location` và mã `id` định danh, truy vấn trạng thái ban đầu `GET`, xử lý lỗi chuẩn `400`/`404` và dễ kiểm thử/cache). SignalR chỉ giữ vai trò truyền thông báo thời gian thực mỏng nhẹ.
+3. **Nếu máy khách lỡ mất thông báo SignalR (do rớt mạng tạm thời hoặc kết nối vào nhóm trễ) thì làm sao biết trạng thái mới nhất?**
+   * Máy khách luôn giữ kênh REST (`GET /api/submissions/{id}`) làm nguồn dữ liệu gốc (source of truth). Ngay sau khi đăng ký nhóm SignalR (`WatchSubmission`) và khi kết nối lại (`Reconnected`), máy khách gọi lại API REST để đọc trạng thái mới nhất trên máy chủ và dùng trường `UpdatedAt` để bỏ qua các thông báo cũ hơn.
+
+---
+
+### 3. Bảng kết quả 5 thí nghiệm phân tán (Bước 7)
+
+| STT | Thí nghiệm | Dự đoán | Kết quả thực tế | Giải thích bản chất phân tán |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **Hai máy khách nộp 2 bài khác nhau cùng lúc** | Mỗi máy khách chỉ nhận thông báo của riêng bài mình nộp. | Đúng như dự đoán (`edusubmit-b7-exp.png`): mỗi client nhận riêng luồng `processing` $\rightarrow$ `graded` của đúng GUID mình tạo. | Hub đưa từng kết nối vào nhóm riêng `submission:{id}`, giúp cô lập phạm vi phát tin (multicast theo nhóm). |
+| **2** | **Tắt máy chủ giữa chừng khi máy khách đang chờ** | Máy khách báo mất kết nối hoặc kích hoạt tự động kết nối lại. | Máy khách phát hiện đứt kết nối ngay khi tiến trình Server dừng; dữ liệu trong bộ nhớ (`List`) của Server bị mất do chưa lưu DB. | Giao tiếp mạng không tin cậy và lưu trữ In-Memory không bền vững qua các lần khởi động lại tiến trình. |
+| **3** | **Gọi `WatchSubmission` với `id` không tồn tại** | Hub vẫn thêm kết nối vào nhóm nhưng không bao giờ nhận được thông báo. | Hub không báo lỗi, kết nối nằm chờ trong nhóm `submission:{id}` và hết thời gian chờ (timeout). | Hub mỏng chỉ làm nhiệm vụ định tuyến nhóm, không truy vấn kiểm tra nghiệp vụ ở tầng dữ liệu. |
+| **4** | **Đổi trạng thái trên máy chủ nhưng không gọi `SendAsync`** | Dữ liệu REST thay đổi nhưng máy khách SignalR không nhận được tin. | Gọi `GET /api/submissions/{id}` thấy trạng thái đã là `graded`, nhưng màn hình chờ SignalR đứng yên. | Cập nhật trạng thái dữ liệu và phát sự kiện thông báo là hai thao tác tách biệt nhau trên máy chủ. |
+| **5** | **Máy khách gọi `GET` REST ngay sau khi nhận sự kiện `graded`** | Dữ liệu đọc lại từ REST khớp hoàn toàn với trạng thái SignalR vừa báo. | Dòng cuối in ra `Trang thai doc lai bang REST: graded`, trùng khớp 100% với thông báo SignalR. | Khóa `submissionsLock` đảm bảo tính nhất quán dữ liệu giữa luồng ghi của tác vụ nền và luồng đọc của HTTP API. |
