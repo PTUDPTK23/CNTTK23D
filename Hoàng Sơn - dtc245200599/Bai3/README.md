@@ -108,3 +108,23 @@ Terminal của Bình in:
     [Broadcast] Xin chao tat ca tu Binh
 
 An không nhận Echo của Bình. Bình tham gia sau nên không thấy các tin An đã gửi trước đó. Dòng [System] trong hình minh họa sẽ được thêm ở bước 6.
+
+## Bước 6 – Vòng đời kết nối và tự kết nối lại
+
+PingHub ghi nhật ký [Hub] khi có kết nối mở hoặc đóng và gửi SystemMessage cho các máy khách đang kết nối. Ping.Client đăng ký SystemMessage, Reconnecting, Reconnected và Closed trước StartAsync.
+
+Từ thư mục PingSignalR, chạy máy chủ và máy khách An trong hai terminal.
+
+    dotnet run --project src/Ping.Api --urls http://localhost:5200
+    dotnet run --project src/Ping.Client -- http://localhost:5200 An
+
+Giữ An mở, dùng Ctrl+C để dừng máy chủ rồi khởi động lại ở cùng địa chỉ. Với lịch mặc định, máy khách chờ lần lượt 0, 2, 10 và 30 giây trước mỗi lần thử. Nếu cả bốn lần đều thất bại, sự kiện Closed được gọi.
+
+Kiểm tra trang 39 trên cổng tạm 59242 vì cổng 5200 đang có máy chủ khác chạy. Các dòng sau xuất hiện trong terminal của An.
+
+    An da ket noi den PingApi. ConnectionId: LeFcO19M
+    [Lifecycle] Dang ket noi lai...
+    [Lifecycle] Da ket noi lai: RV4t3yxt
+    [System] Client RV4t3yxt da ket noi.
+
+Sau khi An kết nối lại, Bình vào nhóm và gửi tin. An nhận Broadcast và thông báo Bình ngắt kết nối. Tin Group của Bình chỉ hiện ở Bình vì An đã có ConnectionId mới và chưa gọi JoinGroup lại. Máy chủ in các dòng [Hub] tương ứng, và máy khách in Closed khi kết thúc.

@@ -19,6 +19,22 @@ app.Run();
 // Tạo Hub SignalR
 sealed class PingHub : Hub
 {
+    public override async Task OnConnectedAsync()
+    {
+        var shortId = Context.ConnectionId[..8];
+        Console.WriteLine($"[Hub] + {shortId} ket noi");
+        await Clients.All.SendAsync("SystemMessage", $"Client {shortId} da ket noi.");
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var shortId = Context.ConnectionId[..8];
+        Console.WriteLine($"[Hub] - {shortId} ngat");
+        await Clients.All.SendAsync("SystemMessage", $"Client {shortId} da ngat ket noi.");
+        await base.OnDisconnectedAsync(exception);
+    }
+
     public async Task Echo(string message)
     {
         await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");

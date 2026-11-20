@@ -16,8 +16,29 @@ connection.On<string>("BroadcastMessage",
 connection.On<string>("GroupMessage",
     message => Console.WriteLine($"[Group] {message}"));
 
+connection.On<string>("SystemMessage",
+    message => Console.WriteLine($"[System] {message}"));
+
+connection.Reconnecting += _ =>
+{
+    Console.WriteLine("[Lifecycle] Dang ket noi lai...");
+    return Task.CompletedTask;
+};
+
+connection.Reconnected += newId =>
+{
+    Console.WriteLine($"[Lifecycle] Da ket noi lai: {newId?[..8]}");
+    return Task.CompletedTask;
+};
+
+connection.Closed += _ =>
+{
+    Console.WriteLine("[Lifecycle] Ket noi da dong.");
+    return Task.CompletedTask;
+};
+
 await connection.StartAsync();
-Console.WriteLine($"{name} da ket noi den PingApi.");
+Console.WriteLine($"{name} da ket noi den PingApi. ConnectionId: {connection.ConnectionId?[..8]}");
 
 await connection.InvokeAsync("Echo", $"Xin chao SignalR tu {name}");
 await connection.InvokeAsync("JoinGroup", "lop-hoc-01");
