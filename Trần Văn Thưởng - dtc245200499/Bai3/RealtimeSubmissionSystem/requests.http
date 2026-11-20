@@ -1,0 +1,59 @@
+@host = http://localhost:5000
+
+### 1. Health
+GET {{host}}/
+
+### 2. List assignments
+GET {{host}}/api/assignments
+
+### 3. Create a submission (capture its id from the response)
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200499",
+  "repositoryUrl": "https://github.com/dtc245200499-hue/CNTTK23D"
+}
+
+### 4. Read the newly created submission
+GET {{host}}/api/submissions/{{createSubmission.response.body.id}}
+
+### 5. Invalid submission: required fields are missing
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "",
+  "repositoryUrl": ""
+}
+
+### 6. Unknown assignment
+POST {{host}}/api/assignments/999/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200499",
+  "repositoryUrl": "https://example.com/submission"
+}
+
+### 7. Closed assignment
+POST {{host}}/api/assignments/2/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200499",
+  "repositoryUrl": "https://example.com/submission"
+}
+
+### 8. Unknown submission
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 9. SignalR negotiate for the submission hub
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 10. Deliberately incorrect hub route
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
+
+### 11. PingSignalR hub negotiate (start PingSignalR separately on port 5200)
+POST http://localhost:5200/hubs/ping/negotiate?negotiateVersion=1
