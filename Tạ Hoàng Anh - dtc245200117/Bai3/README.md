@@ -29,3 +29,11 @@ POST /hubs/ping/negotiate?negotiateVersion=1 trả về connectionId và ba phư
 ![Máy chủ PingApi chạy trên cổng 5200](docs/buoc2-server.png)
 
 ![Kiểm tra negotiate và các endpoint bằng curl](docs/buoc2-negotiate.png)
+
+## Bước 3 – Phản hồi Echo cho máy khách đã gọi
+
+Khi máy khách gọi `Echo`, hub gửi sự kiện `EchoResponse` với nội dung `Echo: <tin nhắn>` qua `Clients.Caller`. Phản hồi chỉ đến kết nối đã gọi.
+
+Build thành công với 0 cảnh báo và 0 lỗi. Kiểm tra qua kết nối SignalR cục bộ nhận được `Echo: Xin chao SignalR`.
+
+![Máy chủ Ping.Api khởi động lại trên cổng 5200](docs/buoc3-server.png)
