@@ -163,3 +163,15 @@ Máy khách tạo `HttpClient` cho REST và `HubConnection` cho SignalR từ cù
 Build thành công với 0 lỗi. Chạy client khi máy chủ đang hoạt động in `Da ket noi SignalR.`. Phần tạo lượt nộp và chờ trạng thái sẽ được thêm ở Bước 6.
 
 ![Terminal 2 chạy máy khách và kết nối SignalR thành công](edusubmit-buoc5-ketnoi.png)
+
+### Bước 6 – Tạo và theo dõi lượt nộp
+
+Máy khách lấy danh sách bài tập bằng REST, chọn bài đầu tiên và gửi POST tạo lượt nộp. Sau khi kiểm tra mã `201 Created`, client dùng ID vừa nhận để gọi `WatchSubmission` và chờ thông báo `graded` tối đa 10 giây. Cuối cùng client đọc lại trạng thái bằng REST.
+
+Build thành công với 0 lỗi. Khi chạy thử, client nhận lần lượt `processing` và `graded` qua SignalR, sau đó REST trả `graded`. Nếu gửi lại cùng mã sinh viên cho cùng bài tập, API trả `DUPLICATE_SUBMISSION` và client in thông báo lỗi. Máy chủ ghi `[Hub]` khi client bắt đầu theo dõi và `[Push]` khi gửi từng trạng thái. Client in thời gian cập nhật cùng thông báo SignalR.
+
+![Máy khách nhận processing, graded qua SignalR và đọc graded bằng REST](edusubmit-buoc6-graded.png)
+
+![Terminal 2 hiển thị thời gian hai thông báo SignalR](edusubmit-buoc6-thoigian.png)
+
+![Terminal 1 ghi nhận theo dõi và gửi hai trạng thái](edusubmit-buoc6-server.png)

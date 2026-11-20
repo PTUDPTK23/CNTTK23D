@@ -119,6 +119,7 @@ static async Task UpdateStatusAsync(Guid submissionId, string status, List<Submi
     {
         await hubContext.Clients.Group(SubmissionGroups.ForSubmission(submissionId))
             .SendAsync("SubmissionStatusChanged", message);
+        Console.WriteLine($"[Push] {SubmissionGroups.ForSubmission(submissionId)} -> {status}");
     }
     catch (Exception exception)
     {
@@ -137,11 +138,12 @@ record SubmissionStatusMessage(Guid SubmissionId, string Status, DateTimeOffset 
 
 sealed class SubmissionHub : Hub
 {
-    public Task WatchSubmission(string submissionId)
+    public async Task WatchSubmission(string submissionId)
     {
-        return Groups.AddToGroupAsync(
+        await Groups.AddToGroupAsync(
             Context.ConnectionId,
             SubmissionGroups.ForSubmission(submissionId));
+        Console.WriteLine($"[Hub] {Context.ConnectionId[..8]} theo doi {SubmissionGroups.ForSubmission(submissionId)}");
     }
 }
 
