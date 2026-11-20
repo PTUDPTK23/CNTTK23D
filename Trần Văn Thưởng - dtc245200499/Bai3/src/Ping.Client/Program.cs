@@ -12,6 +12,26 @@ await using var connection = new HubConnectionBuilder()
 connection.On<string>("EchoResponse", message => Console.WriteLine($"[Echo] {message}"));
 connection.On<string>("BroadcastMessage", message => Console.WriteLine($"[Broadcast] {message}"));
 connection.On<string>("GroupMessage", message => Console.WriteLine($"[Group] {message}"));
+connection.On<string>("SystemMessage", message => Console.WriteLine($"[System] {message}"));
+
+connection.Reconnecting += exception =>
+{
+    Console.WriteLine("[Lifecycle] Dang ket noi lai...");
+    return Task.CompletedTask;
+};
+
+connection.Reconnected += async newConnectionId =>
+{
+    Console.WriteLine($"[Lifecycle] Da ket noi lai: {newConnectionId?[..8]}");
+    // SignalR group membership is tied to the old ConnectionId, so join again.
+    await connection.InvokeAsync("JoinGroup", groupName);
+};
+
+connection.Closed += exception =>
+{
+    Console.WriteLine("[Lifecycle] Ket noi da dong.");
+    return Task.CompletedTask;
+};
 
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi. ConnectionId: {connection.ConnectionId}");

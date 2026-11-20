@@ -12,6 +12,20 @@ app.Run();
 
 sealed class PingHub : Hub
 {
+    public override async Task OnConnectedAsync()
+    {
+        Console.WriteLine($"[Hub] + {Context.ConnectionId[..8]} ket noi");
+        await Clients.All.SendAsync("SystemMessage", $"Client {Context.ConnectionId[..8]} da ket noi.");
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        Console.WriteLine($"[Hub] - {Context.ConnectionId[..8]} ngat");
+        await Clients.All.SendAsync("SystemMessage", $"Client {Context.ConnectionId[..8]} da ngat ket noi.");
+        await base.OnDisconnectedAsync(exception);
+    }
+
     public async Task Echo(string message)
     {
         await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");
