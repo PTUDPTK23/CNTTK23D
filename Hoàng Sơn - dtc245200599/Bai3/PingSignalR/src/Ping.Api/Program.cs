@@ -17,4 +17,10 @@ app.MapHub<PingHub>("/hubs/ping");
 app.Run();
 
 // Tạo Hub SignalR
-sealed class PingHub : Hub { }
+sealed class PingHub : Hub
+{
+    public async Task Echo(string message)
+    {
+        await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");
+    }
+}

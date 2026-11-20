@@ -37,3 +37,12 @@ GET / xác nhận PingApi đang chạy. POST negotiate trả connectionId và c�
 ![Máy chủ lắng nghe ở cổng 5200](anh/buoc2-server.png)
 
 ![Phản hồi 400 khi gọi hub mà thiếu ID kết nối](anh/buoc2-get-hub-400.png)
+
+## Bước 3 – Thêm phương thức Echo
+
+Máy khách gọi Echo với nội dung tin nhắn. Hub dùng Clients.Caller để gửi sự kiện EchoResponse về đúng kết nối vừa gọi, với nội dung có tiền tố `Echo:`.
+
+    dotnet build
+    dotnet run --project src/Ping.Api --urls http://localhost:5200
+
+Sau khi sửa Program.cs, dừng máy chủ cũ bằng Ctrl+C rồi khởi động lại. Bước 4 sẽ dùng máy khách SignalR để gọi Echo và chụp kết quả cho cả hai bước.
