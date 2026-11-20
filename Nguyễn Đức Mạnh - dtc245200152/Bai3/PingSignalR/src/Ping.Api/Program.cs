@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
-// Việc 1: đăng ký dịch vụ SignalR vào DI
+// Viec 1: dang ky dich vu SignalR vao DI
 builder.Services.AddSignalR();
 
 var app = builder.Build();
@@ -9,14 +9,14 @@ var app = builder.Build();
 app.MapGet("/", () => Results.Ok(
     new { service = "PingApi", status = "running" }));
 
-// Việc 2: ánh xạ hub vào tuyến /hubs/ping
+// Viec 2: anh xa hub vao tuyen /hubs/ping
 app.MapHub<PingHub>("/hubs/ping");
 
 app.Run();
 
 sealed class PingHub : Hub
 {
-    // Máy khách gọi Echo -> trả lời RIÊNG người gọi
+    // May khach goi Echo -> tra loi RIENG nguoi goi
     public async Task Echo(string message)
     {
         await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");

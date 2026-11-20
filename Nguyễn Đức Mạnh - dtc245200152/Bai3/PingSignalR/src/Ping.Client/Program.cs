@@ -4,13 +4,13 @@ var serverUrl = args.Length > 0 ? args[0].TrimEnd('/')
                                 : "http://localhost:5200";
 var name = args.Length > 1 ? args[1] : "Client";
 
-// ① Xây dựng kết nối tới hub
+// (1) Xay dung ket noi toi hub
 await using var connection = new HubConnectionBuilder()
     .WithUrl($"{serverUrl}/hubs/ping")
     .WithAutomaticReconnect()
     .Build();
 
-// ② Đăng ký hàm xử lý cho từng TÊN thông điệp
+// (2) Dang ky ham xu ly cho tung TEN thong diep
 connection.On<string>("EchoResponse",
     msg => Console.WriteLine($"[Echo] {msg}"));
 connection.On<string>("BroadcastMessage",
@@ -32,11 +32,11 @@ connection.Closed += _ => {
     Console.WriteLine("[Lifecycle] Ket noi da dong.");
     return Task.CompletedTask; };
 
-// ③ Mở kết nối: negotiate + chọn WebSocket
+// (3) Mo ket noi: negotiate + chon WebSocket
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi.");
 
-// Gọi phương thức Echo trên hub
+// Goi phuong thuc Echo tren hub
 await connection.InvokeAsync("Echo", $"Xin chao SignalR tu {name}");
 
 await connection.InvokeAsync("JoinGroup",
