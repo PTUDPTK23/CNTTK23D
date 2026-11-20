@@ -1,0 +1,46 @@
+@host = http://localhost:5000
+@studentCode = DTC245200604
+
+### 1. Kiem tra API - 200
+GET {{host}}/
+
+### 2. Danh sach bai tap - 200
+GET {{host}}/api/assignments
+
+### 3. Tao luot nop - 201 + Location + received
+# Doi studentCode hoac khoi dong lai API truoc khi chay lai ca nay.
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "{{studentCode}}",
+  "repositoryUrl": "https://example.com/{{studentCode}}/signalr"
+}
+
+### 4. Doc luot nop vua tao - 200 (received -> processing -> graded)
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Thieu du lieu - 400 INVALID_SUBMISSION
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{}
+
+### 6. Bai tap 99 khong ton tai - 404 ASSIGNMENT_NOT_FOUND
+POST {{host}}/api/assignments/99/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "{{studentCode}}",
+  "repositoryUrl": "https://example.com/{{studentCode}}/signalr"
+}
+
+### 7. GUID rong - 404 SUBMISSION_NOT_FOUND
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. Bat tay SignalR - 200 + connectionId
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Sai duong dan hub - 404
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
