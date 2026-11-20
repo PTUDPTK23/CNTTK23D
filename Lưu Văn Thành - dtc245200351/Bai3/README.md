@@ -30,3 +30,21 @@ git commit -m "Bai3 B2: cau hinh PingHub va kiem tra negotiate"
 | 1. An gọi `Echo("hi")` | Nhận | Không | Không | `Clients.Caller` |
 | 2. Chi gọi `SendToGroup("lop-hoc-01", "x")` | Nhận | Nhận | Không (vì Chi không ở trong nhóm) | `Clients.Group` |
 | 3. Bình gọi `Broadcast("y")` | Nhận | Nhận | Nhận | `Clients.All` |
+## Bước 6: Vòng đời kết nối và tự động kết nối lại
+![buoc6-reconnect](anh/buoc6-reconnect.png)
+- **Thấy:** Máy chủ in `[Hub] + ... ket noi` khi client mở và `[Hub] - ... ngat` khi đóng. Khi tắt máy chủ rồi bật lại, client `An` tự động kích hoạt sự kiện `Reconnecting` (`Dang ket noi lai...`) và `Reconnected` (`Da ket noi lai: ...`) với một `ConnectionId` mới.
+- **Giải thích:** `WithAutomaticReconnect()` mặc định thử kết nối lại tại các mốc `0s, 2s, 10s, 30s` (hết 4 lần sẽ chuyển sang `Closed`). Sau khi nối lại thành công, server cấp `ConnectionId` mới nên client cần tự đăng ký lại vào các nhóm cũ nếu cần.
+
+## Bước 7: Ba thí nghiệm lỗi kết nối phân tán
+![buoc7-loi1](anh/buoc7-loi1.png)
+1. **Máy chủ chưa chạy:** Chạy client khi server đã tắt $\rightarrow$ Gặp lỗi `HttpRequestException: Connection refused (localhost:5200)` ngay tại `StartAsync()` vì cơ chế tự nối lại chỉ áp dụng cho kết nối đã thiết lập thành công trước đó.
+2. **Sai đường dẫn Hub (`/hub/ping`):** Gặp lỗi `404 (Not Found)` trong pha `negotiate` do URL không khớp tuyến đã khai báo ở `MapHub<PingHub>("/hubs/ping")`.
+3. **Sai tên thông điệp (`On("EchoRespone")`):** Không báo lỗi biên dịch hay runtime nhưng không nhận được phản hồi `[Echo]` do tên sự kiện lắng nghe không khớp với tên gửi từ Hub.
+
+## Tổng hợp 4 phạm vi gửi thông điệp trong SignalR
+| Phạm vi | Người nhận | Ví dụ ứng dụng (EduSubmit) |
+|---|---|---|
+| `Clients.All` | Mọi kết nối đang mở (bao gồm cả người gửi) | Thông báo máy chủ bảo trì; bài tập mới được đăng |
+| `Clients.Caller` | Chỉ kết nối vừa gọi phương thức trên Hub | Xác nhận đã đăng ký theo dõi lượt nộp |
+| `Clients.Group(ten)` | Toàn bộ thành viên đang ở trong nhóm | Cập nhật trạng thái chấm bài của nhóm `submission:{id}` |
+| `Clients.Client(id)` | Duy nhất một `ConnectionId` cụ thể | Gửi thông báo riêng cho một phiên làm việc |
