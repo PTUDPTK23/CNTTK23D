@@ -125,3 +125,8 @@ Thí nghiệm tên event sai dùng cờ `--event-name-mismatch`; thí nghiệm t
 - `processing` và kết quả cuối đang được mô phỏng bằng `Task.Delay`; đây chưa phải worker chấm bài thật.
 - Hub chỉ phát trạng thái, không xác thực danh tính hay phân quyền vào nhóm; hệ thống thật cần kiểm tra quyền trước khi cho theo dõi id.
 
+## Bằng chứng chạy
+
+- [Năm thí nghiệm và kết quả quan sát](docs/evidence/experiments.md)
+- [Build, hai máy khách và 9 ca HTTP](docs/evidence/verification.md)
+
