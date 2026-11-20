@@ -143,3 +143,15 @@ Gửi theo nhóm giới hạn thông báo trạng thái đến các kết nối 
 ![Terminal 1 chạy EduSubmit realtime trên cổng 5000](edusubmit-buoc3-server.png)
 
 ![Terminal 2 nhận connectionId ở đường dẫn đúng và 404 ở đường dẫn sai](edusubmit-buoc3-negotiate.png)
+
+### Bước 4 – Chấm bài ở nền và gửi trạng thái qua SignalR
+
+POST trả `201 Created` với trạng thái `received` rồi tác vụ nền tiếp tục chấm bài. Sau khoảng 1 giây, trạng thái chuyển sang `processing`, rồi chuyển sang `graded` khoảng 2 giây sau đó.
+
+Máy chủ cập nhật trạng thái và `UpdatedAt` dưới khóa `submissionsLock` trước khi gửi `SubmissionStatusChanged` qua `IHubContext` đến nhóm `submission:{id}`. Thông báo chứa ba trường `SubmissionId`, `Status` và `UpdatedAt`. Lỗi gửi thông báo được ghi vào log để tác vụ vẫn cập nhật trạng thái tiếp theo.
+
+Build thành công với 0 lỗi. Ba lần GET theo `Location` lần lượt trả `received`, `processing` và `graded` với `updatedAt` tăng dần. Máy khách theo dõi nhận được hai thông báo, với trạng thái và thời điểm khớp kết quả REST.
+
+![POST trả 201 và ba lần GET lần lượt trả received, processing, graded](edusubmit-buoc4-trangthai.png)
+
+![Lệnh GET theo ID lượt nộp trả trạng thái graded](edusubmit-buoc4-get-graded.png)

@@ -29,7 +29,8 @@ app.MapGet("/api/assignments/{assignmentId:int}", (int assignmentId) =>
         : Results.Ok(assignment);
 });
 
-app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId, CreateSubmissionRequest request) =>
+app.MapPost("/api/assignments/{assignmentId:int}/submissions",
+    (int assignmentId, CreateSubmissionRequest request, IHubContext<SubmissionHub> hubContext) =>
 {
     var assignment = assignments.FirstOrDefault(item => item.Id == assignmentId);
     if (assignment is null)
@@ -41,9 +42,10 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId
     if (string.IsNullOrWhiteSpace(request.StudentCode) || string.IsNullOrWhiteSpace(request.RepositoryUrl))
         return Results.BadRequest(new ApiError("INVALID_SUBMISSION", "Thieu ma sinh vien hoac kho ma nguon."));
 
+    var studentCode = request.StudentCode.Trim();
+    SubmissionDto submission;
     lock (submissionsLock)
     {
-        var studentCode = request.StudentCode.Trim();
         var duplicated = submissions.Any(item =>
             item.AssignmentId == assignmentId &&
             item.StudentCode.Equals(studentCode, StringComparison.OrdinalIgnoreCase));
@@ -51,12 +53,14 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId
             return Results.Conflict(new ApiError("DUPLICATE_SUBMISSION", "Sinh vien da nop bai tap nay."));
 
         var now = DateTimeOffset.UtcNow;
-        var submission = new SubmissionDto(
+        submission = new SubmissionDto(
             Guid.NewGuid(), assignmentId, studentCode, request.RepositoryUrl.Trim(),
             "received", now, now);
         submissions.Add(submission);
-        return Results.Created($"/api/submissions/{submission.Id}", submission);
     }
+
+    _ = SimulateGradingAsync(submission.Id, submissions, submissionsLock, hubContext, app.Logger);
+    return Results.Created($"/api/submissions/{submission.Id}", submission);
 });
 
 app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
@@ -86,11 +90,50 @@ app.MapDelete("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
 app.MapHub<SubmissionHub>("/hubs/submissions");
 app.Run();
 
+static async Task SimulateGradingAsync(Guid submissionId, List<SubmissionDto> submissions,
+    object submissionsLock, IHubContext<SubmissionHub> hubContext, ILogger logger)
+{
+    await Task.Delay(TimeSpan.FromSeconds(1));
+    await UpdateStatusAsync(submissionId, "processing", submissions, submissionsLock, hubContext, logger);
+
+    await Task.Delay(TimeSpan.FromSeconds(2));
+    await UpdateStatusAsync(submissionId, "graded", submissions, submissionsLock, hubContext, logger);
+}
+
+static async Task UpdateStatusAsync(Guid submissionId, string status, List<SubmissionDto> submissions,
+    object submissionsLock, IHubContext<SubmissionHub> hubContext, ILogger logger)
+{
+    SubmissionDto updated;
+    lock (submissionsLock)
+    {
+        var index = submissions.FindIndex(submission => submission.Id == submissionId);
+        if (index < 0)
+            return;
+
+        updated = submissions[index] with { Status = status, UpdatedAt = DateTimeOffset.UtcNow };
+        submissions[index] = updated;
+    }
+
+    var message = new SubmissionStatusMessage(updated.Id, updated.Status, updated.UpdatedAt);
+    try
+    {
+        await hubContext.Clients.Group(SubmissionGroups.ForSubmission(submissionId))
+            .SendAsync("SubmissionStatusChanged", message);
+    }
+    catch (Exception exception)
+    {
+        logger.LogWarning(exception, "Could not send status {Status} for submission {SubmissionId}",
+            status, submissionId);
+    }
+}
+
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
 record ApiError(string Code, string Message);
 record CreateSubmissionRequest(string StudentCode, string RepositoryUrl);
 record SubmissionDto(Guid Id, int AssignmentId, string StudentCode, string RepositoryUrl,
     string Status, DateTimeOffset ReceivedAt, DateTimeOffset UpdatedAt);
+
+record SubmissionStatusMessage(Guid SubmissionId, string Status, DateTimeOffset UpdatedAt);
 
 sealed class SubmissionHub : Hub
 {
