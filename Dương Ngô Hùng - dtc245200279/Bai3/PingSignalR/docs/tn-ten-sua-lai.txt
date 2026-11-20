@@ -1,0 +1,5 @@
+# Sau khi sửa lại đúng tên ở cả hai chiều
+An da ket noi den PingApi.
+[Echo] Echo: Xin chao SignalR tu An
+Dang cho thong diep... Nhan Enter de thoat.
+(exit code: 0)
