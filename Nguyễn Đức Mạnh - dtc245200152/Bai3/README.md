@@ -7,7 +7,7 @@ Cấu trúc thư mục:
 ```
 Bai3/
 ├── README.md        (nhật ký này)
-├── anh/             (ảnh minh chứng từng bước)
+├── anhchupminhchung/ (ảnh minh chứng từng bước)
 └── PingSignalR/
     ├── PingSignalR.slnx
     └── src/Ping.Api, Ping.Client
@@ -19,7 +19,7 @@ Bai3/
 
 ## Bước 1: tạo solution, 2 project, thêm gói SignalR cho máy khách
 
-![build](anh/buoc1-build.png)
+![build](anhchupminhchung/buoc1-build.png)
 
 Lệnh đã chạy:
 
@@ -48,11 +48,11 @@ Code `src/Ping.Api/Program.cs`: thêm `builder.Services.AddSignalR();` (trước
 
 Terminal 1 – máy chủ chạy ở cổng 5200:
 
-![may chu](anh/buoc2-maychu.png)
+![may chu](anhchupminhchung/buoc2-maychu.png)
 
 Terminal 2 – ba lệnh kiểm tra:
 
-![negotiate](anh/buoc2-negotiate.png)
+![negotiate](anhchupminhchung/buoc2-negotiate.png)
 
 Thấy:
 - `GET /` → `{"service":"PingApi","status":"running"}`: endpoint REST vẫn chạy song song với hub.
@@ -75,7 +75,7 @@ sealed class PingHub : Hub
 }
 ```
 
-![build va chay lai](anh/buoc3-build-chay-lai.png)
+![build va chay lai](anhchupminhchung/buoc3-build-chay-lai.png)
 
 Thấy: build `0 Error(s)`; máy chủ chạy lại ở `http://localhost:5200`.
 
@@ -87,7 +87,7 @@ Code `src/Ping.Client/Program.cs`: `HubConnectionBuilder().WithUrl(".../hubs/pin
 
 Terminal 1 – máy chủ (trái), Terminal 2 – máy khách An (phải):
 
-![echo](anh/buoc4-echo.png)
+![echo](anhchupminhchung/buoc4-echo.png)
 
 Lệnh máy khách: `dotnet run --project src/Ping.Client -- http://localhost:5200 An`
 
@@ -101,7 +101,7 @@ Thêm vào `PingHub`: `Broadcast` (`Clients.All`, thông điệp `BroadcastMessa
 
 Chạy 3 terminal theo thứ tự: máy chủ → An → Bình. Trái: An (chạy trước), phải: Bình (chạy sau):
 
-![nhom](anh/buoc5-nhom.png)
+![nhom](anhchupminhchung/buoc5-nhom.png)
 
 Thấy:
 - **An** nhận tin của Bình: `[Group] s8Qx7oyn da tham gia nhom lop-hoc-01`, `[Group] Thong bao nhom tu Binh`, `[Broadcast] Xin chao tat ca tu Binh`.
@@ -126,11 +126,11 @@ Máy chủ thêm `OnConnectedAsync` / `OnDisconnectedAsync` (in `[Hub] + ... ket
 
 Trước khi tắt máy chủ – máy chủ in `[Hub] + hX8OHTyo ket noi`, An nhận `[System] Client hX8OHTyo da ket noi.`:
 
-![truoc khi tat](anh/buoc6-truoc-khi-tat.png)
+![truoc khi tat](anhchupminhchung/buoc6-truoc-khi-tat.png)
 
 Thí nghiệm: tắt máy chủ (Ctrl+C), vài giây sau chạy lại. Trái: An, phải: máy chủ chạy lại:
 
-![noi lai](anh/buoc6-noilai.png)
+![noi lai](anhchupminhchung/buoc6-noilai.png)
 
 Thấy: An in `[Lifecycle] Dang ket noi lai...` rồi `[Lifecycle] Da ket noi lai: _-2n_BG1` và `[System] Client _-2n_BG1 da ket noi.`; máy chủ mới in `[Hub] + _-2n_BG1 ket noi`.
 
@@ -154,15 +154,15 @@ Kết quả chạy thật:
 
 Thí nghiệm 1 – máy chủ chưa chạy:
 
-![loi 1](anh/buoc7-loi1.png)
+![loi 1](anhchupminhchung/buoc7-loi1.png)
 
 Thí nghiệm 2 – sai đường dẫn hub `/hub/ping`:
 
-![loi 2](anh/buoc7-loi2.png)
+![loi 2](anhchupminhchung/buoc7-loi2.png)
 
 Thí nghiệm 3 – sai tên thông điệp `EchoRespone`:
 
-![loi 3](anh/buoc7-loi3.png)
+![loi 3](anhchupminhchung/buoc7-loi3.png)
 
 | # | Dự đoán | Kết quả thật | Đúng/Sai | Giải thích |
 |---|---|---|---|---|
