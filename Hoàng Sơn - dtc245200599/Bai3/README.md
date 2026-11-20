@@ -128,3 +128,24 @@ Kiểm tra trang 39 trên cổng tạm 59242 vì cổng 5200 đang có máy ch�
     [System] Client RV4t3yxt da ket noi.
 
 Sau khi An kết nối lại, Bình vào nhóm và gửi tin. An nhận Broadcast và thông báo Bình ngắt kết nối. Tin Group của Bình chỉ hiện ở Bình vì An đã có ConnectionId mới và chưa gọi JoinGroup lại. Máy chủ in các dòng [Hub] tương ứng, và máy khách in Closed khi kết thúc.
+
+## Bước 7 – Ba thí nghiệm lỗi kết nối
+
+| Ca | Cách thử | Kết quả quan sát | Giải thích |
+| --- | --- | --- | --- |
+| 1. Máy chủ chưa chạy | Chạy Ping.Client đến cổng 52733 trên máy cục bộ, nơi chưa có Ping.Api lắng nghe. | HttpRequestException, máy đích từ chối kết nối. | StartAsync đang mở kết nối lần đầu. WithAutomaticReconnect chỉ thử nối lại sau khi một kết nối đã mở bị mất. |
+| 2. Sai đường dẫn hub | Giữ Ping.Api chạy ở cổng 52740. Trong bản thử của Ping.Client, đổi WithUrl từ /hubs/ping thành /hub/ping. | HttpRequestException: Response status code does not indicate success: 404 (Not Found). | Client gửi negotiate tới đường dẫn chưa được máy chủ đăng ký. WithUrl phải khớp với MapHub. |
+| 3. Sai tên thông điệp | Dùng lại /hubs/ping. Trong bản thử, đổi tên đăng ký từ EchoResponse thành EchoRespone. | Client kết nối, vẫn in [Group] và [Broadcast], không có dòng [Echo]. Chương trình thoát với mã 0. | Hub gửi sự kiện EchoResponse. Client đăng ký EchoRespone nên không gọi hàm in Echo. |
+
+Hai biến thể được chạy từ bản sao tạm của máy khách. Chạy đối chứng bằng bản gốc với đường dẫn /hubs/ping và tên EchoResponse cho kết quả:
+
+    [Echo] Echo: Xin chao SignalR tu An
+
+### Ôn tập – Bốn phạm vi gửi ở trang 41
+
+| Phạm vi | Ai nhận | Ví dụ |
+| --- | --- | --- |
+| Clients.All | Mọi kết nối đang mở, gồm cả người gửi. | Thông báo sắp bảo trì cho mọi máy khách. |
+| Clients.Caller | Chỉ kết nối vừa gọi phương thức hub. | Trả Echo về cho người gọi. |
+| Clients.Group(tên) | Các kết nối thuộc nhóm chỉ định. | Báo trạng thái mới cho nhóm theo dõi một lượt nộp. |
+| Clients.Client(id) | Kết nối có ConnectionId được chỉ định. | Gửi riêng thông báo đến một phiên làm việc. |
