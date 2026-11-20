@@ -193,3 +193,39 @@ Các thí nghiệm chạy trên cổng cục bộ tạm và bản sao client th�
 ![Terminal 2 hiển thị trạng thái của SV001](docs/edusubmit-buoc7-sv001.png)
 
 ![Terminal 3 hiển thị trạng thái của SV002](docs/edusubmit-buoc7-sv002.png)
+
+### Bước 8 – Kiểm tra REST và SignalR bằng requests.http
+
+Tệp `RealtimeSubmissionSystem/requests.http` chứa 9 yêu cầu. Ca 3 đặt tên `createSubmission`, ca 4 lấy ID từ phản hồi của ca 3 để đọc lại lượt nộp. Cần gửi ca 3 trước ca 4.
+
+| Ca | Yêu cầu | Kết quả kiểm tra |
+| --- | --- | --- |
+| 1 | GET `/` | 200 |
+| 2 | GET `/api/assignments` | 200 |
+| 3 | POST lượt nộp hợp lệ | 201, `Location`, `received` |
+| 4 | GET lượt nộp vừa tạo | 200, sau 3 giây đọc được `graded` |
+| 5 | POST thiếu dữ liệu | 400 |
+| 6 | POST bài tập 99 | 404 |
+| 7 | GET ID lượt nộp không tồn tại | 404 |
+| 8 | POST negotiate đúng đường dẫn | 200, có `connectionId` |
+| 9 | POST negotiate sai đường dẫn hub | 404 |
+
+Đã build thành công với 0 lỗi và kiểm tra đủ 9 ca trên máy chủ cục bộ.
+
+![Ca 1 — Kiểm tra máy chủ — 200](docs/edusubmit-buoc8-ca1.png)
+
+![Ca 2 — Danh sách bài tập — 200](docs/edusubmit-buoc8-ca2.png)
+
+![Ca 3 — Tạo lượt nộp — 201](docs/edusubmit-buoc8-ca3.png)
+
+![Ca 4 — Đọc lượt nộp — 200 graded](docs/edusubmit-buoc8-ca4.png)
+
+![Ca 5 — Nộp thiếu dữ liệu — 400](docs/edusubmit-buoc8-ca5.png)
+
+![Ca 6 — Bài tập không tồn tại — 404](docs/edusubmit-buoc8-ca6.png)
+
+![Ca 7 — Lượt nộp không tồn tại — 404](docs/edusubmit-buoc8-ca7.png)
+
+![Ca 8 — Bắt tay SignalR — 200](docs/edusubmit-buoc8-ca8.png)
+
+![Ca 9 — Sai đường dẫn hub — 404](docs/edusubmit-buoc8-ca9.png)
