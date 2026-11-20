@@ -1,0 +1,117 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Ping.Api - port 5200",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/PingSignalR/src/Ping.Api/bin/Debug/net10.0/Ping.Api.dll",
+      "cwd": "${workspaceFolder}/PingSignalR/src/Ping.Api",
+      "console": "internalConsole",
+      "env": {
+        "ASPNETCORE_URLS": "http://localhost:5200"
+      },
+      "stopAtEntry": false
+    },
+    {
+      "name": "Ping.Client - Echo",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/PingSignalR/src/Ping.Client/bin/Debug/net10.0/Ping.Client.dll",
+      "cwd": "${workspaceFolder}/PingSignalR/src/Ping.Client",
+      "args": [
+        "http://localhost:5200",
+        "--auto-exit"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeApi - port 5000",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeApi/bin/Debug/net10.0/Submission.RealtimeApi.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeApi",
+      "console": "internalConsole",
+      "env": {
+        "ASPNETCORE_URLS": "http://localhost:5000"
+      },
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeClient - EduSubmit",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient/bin/Debug/net10.0/Submission.RealtimeClient.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient",
+      "args": [
+        "http://localhost:5000",
+        "DTC245200314",
+        "https://github.com/dtc245200314-del/CNTTK23D"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeClient - two submissions",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient/bin/Debug/net10.0/Submission.RealtimeClient.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient",
+      "args": [
+        "http://localhost:5000",
+        "DTC245200314",
+        "https://github.com/dtc245200314-del/CNTTK23D",
+        "--watch-two",
+        "--fail-second"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeClient - late watch",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient/bin/Debug/net10.0/Submission.RealtimeClient.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient",
+      "args": [
+        "http://localhost:5000",
+        "DTC245200314",
+        "https://github.com/dtc245200314-del/CNTTK23D",
+        "--late-watch"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeClient - wrong hub path",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient/bin/Debug/net10.0/Submission.RealtimeClient.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient",
+      "args": [
+        "http://localhost:5000",
+        "DTC245200314",
+        "https://github.com/dtc245200314-del/CNTTK23D",
+        "--wrong-hub-path"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Submission.RealtimeClient - wrong event name",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient/bin/Debug/net10.0/Submission.RealtimeClient.dll",
+      "cwd": "${workspaceFolder}/RealtimeSubmissionSystem/src/Submission.RealtimeClient",
+      "args": [
+        "http://localhost:5000",
+        "DTC245200314",
+        "https://github.com/dtc245200314-del/CNTTK23D",
+        "--wrong-event-name"
+      ],
+      "console": "internalConsole",
+      "stopAtEntry": false
+    }
+  ]
+}
