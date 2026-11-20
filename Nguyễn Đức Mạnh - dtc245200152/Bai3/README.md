@@ -139,3 +139,46 @@ Giải thích:
 - **ConnectionId đổi** (`hX8OHTyo` → `_-2n_BG1`): máy chủ coi đây là kết nối MỚI.
 - **Nhóm bị mất**: nhóm gắn với ConnectionId cũ; muốn ở lại nhóm phải gọi lại `JoinGroup` trong `Reconnected`.
 - **Tin gửi lúc rớt mạng bị mất hẳn**: SignalR không lưu tin để gửi lại.
+
+## Bước 7: ba thí nghiệm lỗi
+
+Dự đoán (ghi TRƯỚC khi chạy):
+
+| # | Thao tác | Dự đoán |
+|---|---|---|
+| 1 | Chạy máy khách khi máy chủ đã tắt | `StartAsync` ném `HttpRequestException` không kết nối được; `WithAutomaticReconnect` không giúp vì kết nối chưa từng mở |
+| 2 | Sửa `WithUrl` thành `/hub/ping` (thiếu `s`) | Lỗi ngay ở bước negotiate: `404 (Not Found)` |
+| 3 | Sửa `On("EchoResponse")` thành `On("EchoRespone")` | Không có lỗi nào, chỉ là không in dòng `[Echo]` |
+
+Kết quả chạy thật:
+
+Thí nghiệm 1 – máy chủ chưa chạy:
+
+![loi 1](anh/buoc7-loi1.png)
+
+Thí nghiệm 2 – sai đường dẫn hub `/hub/ping`:
+
+![loi 2](anh/buoc7-loi2.png)
+
+Thí nghiệm 3 – sai tên thông điệp `EchoRespone`:
+
+![loi 3](anh/buoc7-loi3.png)
+
+| # | Dự đoán | Kết quả thật | Đúng/Sai | Giải thích |
+|---|---|---|---|---|
+| 1 | `HttpRequestException` không kết nối được | `HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:5200)` – chương trình dừng | Đúng | `StartAsync` phải gọi negotiate tới máy chủ; không có tiến trình nào nghe cổng 5200 nên bị từ chối ngay. `WithAutomaticReconnect` chỉ cứu kết nối ĐÃ mở, không áp dụng cho lần mở đầu tiên. |
+| 2 | 404 ở bước negotiate | `HttpRequestException: Response status code does not indicate success: 404 (Not Found)` tại `HttpConnection.NegotiateAsync` | Đúng | Máy chủ chỉ `MapHub` ở `/hubs/ping`; gọi `/hub/ping/negotiate` không có tuyến nào nên 404. Đường dẫn trong `WithUrl` phải khớp từng chữ với `MapHub`. |
+| 3 | Không lỗi, không có dòng `[Echo]` | Kết nối bình thường, có `[System]`, `[Group]`, `[Broadcast]` nhưng **không có `[Echo]`**, không có thông báo lỗi nào | Đúng | Hub vẫn gửi `"EchoResponse"`, nhưng máy khách lại nghe `"EchoRespone"`; SignalR bỏ qua thông điệp không ai đăng ký, không báo lỗi. Đây là lỗi khó phát hiện nhất: khi "không nhận được gì", việc đầu tiên là so tên thông điệp hai phía. |
+
+Sau mỗi thí nghiệm code đã được trả về như cũ và build lại `0 Error(s)`.
+
+### Tổng hợp Phần 1 – 4 phạm vi gửi
+
+| Phạm vi | Ai nhận | Dùng ở PingSignalR |
+|---|---|---|
+| `Clients.All` | Mọi kết nối đang mở | `Broadcast`, `SystemMessage` |
+| `Clients.Caller` | Chỉ người vừa gọi hub | `Echo` |
+| `Clients.Group(tên)` | Thành viên nhóm | `JoinGroup`, `SendToGroup` |
+| `Clients.Client(id)` | Một ConnectionId cụ thể | (chưa dùng) |
+
+Bốn trụ cột: ① `AddSignalR` + `MapHub` ở máy chủ · ② phương thức hub gửi bằng `Clients.X.SendAsync` · ③ `HubConnectionBuilder` + `On` + `StartAsync` ở máy khách · ④ chọn đúng phạm vi người nhận.
