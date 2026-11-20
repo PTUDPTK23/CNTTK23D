@@ -225,3 +225,13 @@ Code `src/Submission.RealtimeApi/Program.cs`: giữ nguyên REST Bài 2 (`GET /a
 Thấy: `201 Created`, header `Location: /api/submissions/{id}`, body có `"status":"received"` và `"updatedAt"`.
 
 Giải thích: `UpdatedAt` là thời điểm đổi trạng thái gần nhất, máy khách so sánh để biết tin nào mới hơn. `lock` vì ở bước 4 tác vụ chấm nền và các yêu cầu HTTP cùng sửa danh sách; chỉ một luồng được đọc/ghi tại một thời điểm. REST là **nguồn sự thật** (câu ④).
+
+## EduSubmit – Bước 3: hub mỏng, đưa kết nối vào nhóm của lượt nộp
+
+Thêm `builder.Services.AddSignalR()`, `app.MapHub<SubmissionHub>("/hubs/submissions")`, lớp `SubmissionHub` chỉ có `WatchSubmission(id)` (thêm kết nối vào nhóm) và lớp `SubmissionGroups` sinh tên nhóm `submission:{id}`.
+
+![negotiate](anhchupminhchung/edusubmit-buoc3-negotiate.png)
+
+Thấy: negotiate ở `/hubs/submissions` trả `connectionId` + 3 cách truyền tải; `/hub/submissions` trả `404 Not Found`.
+
+Giải thích: hub **mỏng** – không tạo, không chấm bài; nghiệp vụ nằm ở REST và tác vụ nền. Dùng nhóm theo lượt nộp vì 2 lý do: **riêng tư** (sinh viên không thấy trạng thái bài của người khác) và **tiết kiệm băng thông** (chỉ gửi đúng người, thay vì `Clients.All` gửi cho tất cả rồi máy khách tự lọc). Nhóm do máy chủ quản lý. `SubmissionGroups` là chỗ duy nhất sinh tên nhóm nên hai phía không lệch tên (câu ②).

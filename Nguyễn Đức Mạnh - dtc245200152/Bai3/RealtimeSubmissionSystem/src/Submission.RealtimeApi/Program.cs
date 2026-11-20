@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.SignalR;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSignalR();            // dang ky SignalR, truoc builder.Build()
 var app = builder.Build();
 
 // Du lieu mau trong bo nho
@@ -77,7 +80,27 @@ app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
     }
 });
 
+app.MapHub<SubmissionHub>("/hubs/submissions");   // truoc app.Run()
+
 app.Run();
+
+// Hub mong: chi dua ket noi vao nhom cua luot nop, khong tao/cham bai
+sealed class SubmissionHub : Hub
+{
+    public Task WatchSubmission(string submissionId)
+    {
+        var group = SubmissionGroups.ForSubmission(submissionId);
+        Console.WriteLine($"[Hub] {Context.ConnectionId[..8]} theo doi {group}");
+        return Groups.AddToGroupAsync(Context.ConnectionId, group);
+    }
+}
+
+// Mot cho duy nhat sinh ten nhom -> hai phia khong lech ten
+static class SubmissionGroups
+{
+    public static string ForSubmission(Guid id) => ForSubmission(id.ToString());
+    public static string ForSubmission(string id) => $"submission:{id}";
+}
 
 // DTO: hinh dang du lieu di qua mang (dat sau app.Run())
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
