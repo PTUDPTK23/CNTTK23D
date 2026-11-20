@@ -47,3 +47,18 @@ Máy chủ chạy ở cổng 5000: `dotnet run --project src/Submission.Realtime
 Ảnh: `rs-b3-may-chu.png`, `rs-b3-negotiate.png`.
 
 **Vì sao nhóm theo lượt nộp (slide 51):** ① **riêng tư** – chỉ người theo dõi đúng lượt nộp mới nhận trạng thái, máy khách không tự lọc nên không bao giờ nhìn thấy dữ liệu của sinh viên khác; ② **băng thông** – một lượt nộp đổi trạng thái chỉ gửi cho vài kết nối trong nhóm thay vì gửi cho mọi kết nối (`Clients.All`) rồi để máy khách bỏ đi.
+
+## Bước 4: IHubContext và mô phỏng chấm nền (slide 52–54)
+
+- `POST` nhận thêm `IHubContext<SubmissionHub> hubContext` (ASP.NET Core đưa vào bằng DI) và gọi `_ = SimulateGradingAsync(...)` **không chờ**: POST trả 201 ngay, chấm bài chạy tiếp phía sau.
+- `SimulateGradingAsync`: `Task.Delay` 1 giây → `processing`, 2 giây → `graded`.
+- `UpdateStatusAsync`: ① `lock` rồi thay phần tử bằng `with { Status, UpdatedAt }` (record bất biến) → ② tạo `SubmissionStatusMessage(Id, Status, UpdatedAt)` → ③ `hub.Clients.Group("submission:{id}").SendAsync("SubmissionStatusChanged", msg)` và in `[Push] …`. **Lưu trước, đẩy sau**: ai đọc REST ngay khi nhận tin đều thấy đúng.
+- Không truyền đối tượng hub vào tác vụ nền được (hub chỉ sống trong một lời gọi) → luôn dùng `IHubContext` khi gửi từ ngoài hub.
+
+| Lần GET | Trạng thái | updatedAt |
+|---|---|---|
+| Ngay sau POST | `received` | 02:29:49.80 |
+| Sau ~1,5 giây | `processing` | 02:29:50.81 |
+| Sau ~4 giây | `graded` | 02:29:52.82 |
+
+Đúng thứ tự received → processing → graded ✓; máy chủ in `[Push] submission:… -> processing`, `-> graded`. REST luôn biết trạng thái đúng; SignalR chỉ giúp máy khách biết sớm hơn. Ảnh: `rs-b4-may-chu.png`, `rs-b4-rest-doi-trang-thai.png`.
