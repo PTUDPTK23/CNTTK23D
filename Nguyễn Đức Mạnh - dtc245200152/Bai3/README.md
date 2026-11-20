@@ -325,6 +325,10 @@ Thí nghiệm 4 – sai tên sự kiện `SubmissionStatusChange`:
 
 ![tn4](anhchupminhchung/edusubmit-tn4-sai-ten.png)
 
+Máy chủ thí nghiệm 4 – vẫn `[Push] ... processing` và `-> graded` dù máy khách không in gì: tin đã gửi đúng nhóm, chỉ là máy khách nghe sai tên nên bỏ qua.
+
+![tn4 may chu](anhchupminhchung/edusubmit-tn4-maychu.png)
+
 Thí nghiệm 5 – chờ 4 giây rồi mới `WatchSubmission` (máy khách, rồi máy chủ):
 
 ![tn5](anhchupminhchung/edusubmit-tn5-watch-muon.png)
