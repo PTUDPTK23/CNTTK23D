@@ -1,0 +1,23 @@
+EduSubmit - ket qua chay that
+
+REST checks:
+GET / -> 200
+GET /api/assignments -> 200
+POST /api/assignments/1/submissions -> 201
+POST thieu du lieu -> 400
+POST assignment 999 -> 404
+GET submission id khong ton tai -> 404
+POST /hubs/submissions/negotiate -> 200
+POST /hub/submissions/negotiate -> 404
+
+SignalR client:
+Da ket noi SignalR.
+Da tao SV001: 320b56ad-3eaa-4a64-b84e-fc0b218fbb2b (received)
+Da tao SV001_FAIL: 6e771eae-855d-4564-80de-af7c80e5353a (received)
+Thong bao SignalR: SV001 -> processing
+Thong bao SignalR: SV001_FAIL -> processing
+Thong bao SignalR: SV001 -> graded
+SV001: REST = graded
+Thong bao SignalR: SV001_FAIL -> failed
+!!! CANH BAO: luot nop SV001_FAIL cham LOI
+SV001_FAIL: REST = failed
