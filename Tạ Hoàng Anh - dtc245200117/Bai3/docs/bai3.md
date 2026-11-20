@@ -37,3 +37,22 @@ Khi máy khách gọi `Echo`, hub gửi sự kiện `EchoResponse` với nội d
 Build thành công với 0 cảnh báo và 0 lỗi. Kiểm tra qua kết nối SignalR cục bộ nhận được `Echo: Xin chao SignalR`.
 
 ![Máy chủ Ping.Api khởi động lại trên cổng 5200](buoc3-server.png)
+
+## Bước 4 – Kết nối máy khách và gọi Echo
+
+Máy khách đăng ký nhận `EchoResponse`, mở kết nối tới `/hubs/ping` rồi gọi `Echo` bằng `InvokeAsync`. Khi chạy hai tiến trình, Terminal 1 giữ máy chủ `Ping.Api` ở cổng `5200`. Tại thư mục `Bai3/PingSignalR`, Terminal 2 chạy:
+
+```cmd
+dotnet run --project src/Ping.Client -- http://localhost:5200 An
+```
+
+Build thành công với 0 cảnh báo và 0 lỗi. Máy khách in `[Echo] Echo: Xin chao SignalR tu An`.
+
+| Thử nghiệm | Kết quả quan sát |
+| --- | --- |
+| Gọi `Ech0` thay cho `Echo` | `HubException` báo `Method does not exist`. |
+| Đăng ký `EchoRespone` thay cho `EchoResponse` | Máy khách kết nối và tiếp tục chờ, nhưng dòng `[Echo]` không xuất hiện. |
+
+![Terminal 1 chạy máy chủ Ping.Api trên cổng 5200](buoc4-server.png)
+
+![Terminal 2 nhận Echo từ máy chủ SignalR](buoc4-echo.png)
