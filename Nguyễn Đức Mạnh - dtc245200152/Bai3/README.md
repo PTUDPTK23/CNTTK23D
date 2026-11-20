@@ -60,3 +60,23 @@ Thấy:
 - `GET /hubs/ping` → `400 Bad Request`, `Connection ID required`.
 
 Giải thích: negotiate là bước bắt tay – máy chủ cấp mã kết nối và báo các cách truyền tải nó hỗ trợ; máy khách chọn cách tốt nhất (thường là WebSockets). Hub không trả lời như REST: gọi thẳng `/hubs/ping` mà chưa có `connectionId` thì bị 400.
+
+## Bước 3: phương thức Echo – máy chủ trả lời riêng người vừa gọi
+
+Thay lớp `PingHub` trong `src/Ping.Api/Program.cs`:
+
+```csharp
+sealed class PingHub : Hub
+{
+    public async Task Echo(string message)
+    {
+        await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");
+    }
+}
+```
+
+![build va chay lai](anh/buoc3-build-chay-lai.png)
+
+Thấy: build `0 Error(s)`; máy chủ chạy lại ở `http://localhost:5200`.
+
+Giải thích: mỗi phương thức `public` của hub là thứ máy khách gọi được qua `InvokeAsync("Echo", ...)`. Mẫu câu gửi: `Clients.<ai nhận>.SendAsync("<TÊN thông điệp>", dữ liệu)`. `Clients.Caller` chỉ gửi cho kết nối vừa gọi. Chưa test được bằng curl vì hub cần máy khách SignalR (bước 4). Sau mỗi lần sửa `Program.cs` phải Ctrl+C và chạy lại máy chủ, nếu không máy chủ vẫn chạy code cũ.
