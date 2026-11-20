@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.SignalR;
+
 // ① Khởi tạo
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSignalR();            // trước builder.Build()
 var app = builder.Build();
 
 // ② Dữ liệu mẫu trong bộ nhớ (giữ nguyên Bài 2): tắt API là mất
@@ -77,8 +80,30 @@ app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
     }
 });
 
+// Kênh thời gian thực: máy khách vào nhóm submission:{id} để nhận thông báo trạng thái
+app.MapHub<SubmissionHub>("/hubs/submissions");   // trước app.Run()
+
 // ④ Chạy
 app.Run();
+
+// Hub mỏng: không tạo, không chấm bài; chỉ đưa kết nối vào nhóm của lượt nộp
+sealed class SubmissionHub : Hub
+{
+    public Task WatchSubmission(string submissionId)
+    {
+        Console.WriteLine($"[Hub] {Context.ConnectionId[..8]} theo doi {SubmissionGroups.ForSubmission(submissionId)}");
+        return Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            SubmissionGroups.ForSubmission(submissionId));
+    }
+}
+
+// Một chỗ duy nhất sinh tên nhóm → hub và tác vụ nền không lệch tên
+static class SubmissionGroups
+{
+    public static string ForSubmission(Guid id) => ForSubmission(id.ToString());
+    public static string ForSubmission(string id) => $"submission:{id}";
+}
 
 // ⑤ Khai báo kiểu: DTO là hợp đồng dữ liệu đi qua mạng
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);

@@ -32,3 +32,18 @@ Máy chủ chạy ở cổng 5000: `dotnet run --project src/Submission.Realtime
 | `GET /api/submissions/{id}` không tồn tại | 404 `SUBMISSION_NOT_FOUND` |
 
 Ảnh: `rs-b2-may-chu.png`, `rs-b2-curl-rest.png`.
+
+## Bước 3: SubmissionHub và nhóm submission:{id} (slide 50–51)
+
+- `builder.Services.AddSignalR()` trước `Build()`; `app.MapHub<SubmissionHub>("/hubs/submissions")` trước `Run()`.
+- `SubmissionHub.WatchSubmission(id)`: chỉ thêm kết nối vào nhóm `submission:{id}` (hub mỏng, không tạo/chấm bài) và in `[Hub] … theo doi submission:{id}`.
+- `SubmissionGroups.ForSubmission(...)`: một chỗ duy nhất sinh tên nhóm để hub và tác vụ nền không lệch tên.
+
+| Kiểm tra | Kết quả |
+|---|---|
+| `POST /hubs/submissions/negotiate?negotiateVersion=1` | 200, có `connectionId` và 3 transport ✓ |
+| `POST /hub/submissions/negotiate?negotiateVersion=1` (thiếu `s`) | **404 Not Found** ✓ |
+
+Ảnh: `rs-b3-may-chu.png`, `rs-b3-negotiate.png`.
+
+**Vì sao nhóm theo lượt nộp (slide 51):** ① **riêng tư** – chỉ người theo dõi đúng lượt nộp mới nhận trạng thái, máy khách không tự lọc nên không bao giờ nhìn thấy dữ liệu của sinh viên khác; ② **băng thông** – một lượt nộp đổi trạng thái chỉ gửi cho vài kết nối trong nhóm thay vì gửi cho mọi kết nối (`Clients.All`) rồi để máy khách bỏ đi.
