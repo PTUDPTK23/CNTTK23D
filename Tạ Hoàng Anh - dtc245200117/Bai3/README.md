@@ -111,3 +111,23 @@ Cả solution build thành công với 0 cảnh báo và 0 lỗi. Hai biến th�
 ![Ca 2 — Sai đường dẫn hub trả HTTP 404](docs/buoc7-loi2.png)
 
 ![Ca 3 — Client vẫn nhận tin nhóm khi đăng ký sai tên EchoResponse](docs/buoc7-loi3.png)
+
+## EduSubmit realtime
+
+### Bước 1 – Tạo solution và hai project
+
+Tạo `RealtimeSubmissionSystem.slnx` với máy chủ `Submission.RealtimeApi` và máy khách `Submission.RealtimeClient`. Thêm gói `Microsoft.AspNetCore.SignalR.Client` phiên bản `10.0.15` cho máy khách và tạo `.gitignore`.
+
+Chạy `dotnet build --tl:off` trong thư mục `Bai3/RealtimeSubmissionSystem`. Cả hai project build thành công với 0 cảnh báo và 0 lỗi.
+
+![Hai project EduSubmit realtime build thành công với 0 lỗi](docs/edusubmit-buoc1-build.png)
+
+### Bước 2 – REST API và thời điểm cập nhật
+
+Giữ các endpoint và mã lỗi của EduSubmit Bài 2. Danh sách lượt nộp dùng chung khóa `submissionsLock` khi đọc, ghi hoặc xóa. Một lượt nộp mới có trạng thái `received` và dùng cùng thời điểm UTC cho `ReceivedAt` và `UpdatedAt`.
+
+Build thành công với 0 lỗi. POST hợp lệ trả `201 Created`, có `Location`, `status: received` và `updatedAt`. GET theo `Location` trả `200 OK`. Bài tập không tồn tại trả `404`. Bài tập đã đóng và dữ liệu thiếu đều trả `400` với mã lỗi tương ứng.
+
+![Terminal 1 chạy Submission.RealtimeApi trên cổng 5000](docs/edusubmit-buoc2-server.png)
+
+![Terminal 2 nhận 201 Created cùng trạng thái received và updatedAt](docs/edusubmit-buoc2-post.png)
