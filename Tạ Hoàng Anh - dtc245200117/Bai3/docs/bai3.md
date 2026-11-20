@@ -175,3 +175,21 @@ Build thành công với 0 lỗi. Khi chạy thử, client nhận lần lượt 
 ![Terminal 2 hiển thị thời gian hai thông báo SignalR](edusubmit-buoc6-thoigian.png)
 
 ![Terminal 1 ghi nhận theo dõi và gửi hai trạng thái](edusubmit-buoc6-server.png)
+
+### Bước 7 – Năm thí nghiệm phân tán
+
+| Thí nghiệm | Dự đoán | Kết quả thực tế | Giải thích |
+| --- | --- | --- | --- |
+| Hai máy khách `SV001` và `SV002` chạy cùng lúc | Mỗi máy chỉ nhận trạng thái lượt nộp của mình. | Cả hai nhận `processing`, `graded` đúng ID đã tạo và REST trả `graded`. | Nhóm `submission:{id}` tách người nhận. |
+| Máy chủ chưa chạy | Máy khách báo lỗi kết nối. | `HttpRequestException`, kết nối bị từ chối. | Tự kết nối lại áp dụng sau khi đã kết nối thành công. |
+| Sai đường dẫn `/hub/submissions` | Negotiate không tìm thấy hub. | `HttpRequestException`, `404 Not Found`. | Đường dẫn thiếu chữ `s` so với `/hubs/submissions`. |
+| Sai tên sự kiện | Không nhận được hai thông báo trạng thái. | Chờ hết 10 giây, không nhận thông báo, REST đọc lại `graded`. | Tên đăng ký ở client không khớp tên sự kiện máy chủ gửi. |
+| Gọi `WatchSubmission` muộn 4 giây | Không nhận được thông báo đã gửi trước khi vào nhóm. | Không nhận thông báo, chờ hết 10 giây, REST đọc lại `graded`. | SignalR không phát lại thông báo cũ khi client vào nhóm muộn. |
+
+Các thí nghiệm chạy trên cổng cục bộ tạm và bản sao client thử nghiệm. Mã client chính tiếp tục dùng đường dẫn và tên sự kiện đúng.
+
+![Terminal 1 chạy máy chủ EduSubmit](edusubmit-buoc7-server.png)
+
+![Terminal 2 hiển thị trạng thái của SV001](edusubmit-buoc7-sv001.png)
+
+![Terminal 3 hiển thị trạng thái của SV002](edusubmit-buoc7-sv002.png)
