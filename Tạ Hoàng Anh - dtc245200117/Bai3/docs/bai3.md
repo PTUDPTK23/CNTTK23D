@@ -19,3 +19,13 @@ Tạo hai project `Ping.Api` và `Ping.Client`. Cả hai đều restore thành c
 - Build thành công với 0 Warning(s), 0 Error(s). Lệnh kiểm tra là `dotnet build --no-restore` sau khi đã restore gói từ nuget.org.
 
 ![Tạo gitignore và build thành công](buoc1.build2.png)
+
+## Bước 2 – Đăng ký SignalR và kiểm tra negotiate
+
+Máy chủ đăng ký SignalR và ánh xạ PingHub tới /hubs/ping. Build thành công với 0 lỗi.
+
+POST /hubs/ping/negotiate?negotiateVersion=1 trả về connectionId và ba phương thức WebSockets, ServerSentEvents, LongPolling. GET /hubs/ping khi thiếu connectionId trả về 400.
+
+![Máy chủ PingApi chạy trên cổng 5200](buoc2-server.png)
+
+![Kiểm tra negotiate và các endpoint bằng curl](buoc2-negotiate.png)
