@@ -94,3 +94,28 @@ Lệnh máy khách: `dotnet run --project src/Ping.Client -- http://localhost:52
 Thấy: `An da ket noi den PingApi.` rồi `[Echo] Echo: Xin chao SignalR tu An`.
 
 Giải thích: `InvokeAsync("Echo", ...)` gửi lời gọi LÊN hub (tên phải khớp tên phương thức C#). Hub gửi `"EchoResponse"` XUỐNG; hàm `On` đã đăng ký in ra dòng `[Echo]`. Hai chiều đi trên cùng một kết nối. `On` phải đăng ký trước `StartAsync` để không lỡ tin; chỉ gọi hub được sau khi `StartAsync` xong. Máy chủ chưa in gì thêm vì hub chưa ghi nhật ký (bước 6 thêm).
+
+## Bước 5: phát rộng (All) và nhóm (Group)
+
+Thêm vào `PingHub`: `Broadcast` (`Clients.All`, thông điệp `BroadcastMessage`), `JoinGroup` (`Groups.AddToGroupAsync`), `SendToGroup` (`Clients.Group`, thông điệp `GroupMessage`). Máy khách thêm 2 dòng `On` trước `StartAsync` và 3 lời gọi `JoinGroup("lop-hoc-01")`, `SendToGroup`, `Broadcast` sau `Echo`.
+
+Chạy 3 terminal theo thứ tự: máy chủ → An → Bình. Trái: An (chạy trước), phải: Bình (chạy sau):
+
+![nhom](anh/buoc5-nhom.png)
+
+Thấy:
+- **An** nhận tin của Bình: `[Group] s8Qx7oyn da tham gia nhom lop-hoc-01`, `[Group] Thong bao nhom tu Binh`, `[Broadcast] Xin chao tat ca tu Binh`.
+- **An KHÔNG nhận** `[Echo] ... tu Binh`, vì Echo dùng `Clients.Caller`.
+- **Bình** chỉ thấy tin của chính mình, không thấy tin An gửi trước khi Bình vào (SignalR không lưu tin cũ).
+
+Giải thích 3 phạm vi gửi: `Clients.Caller` = chỉ người gọi; `Clients.Group(tên)` = chỉ thành viên nhóm; `Clients.All` = mọi kết nối đang mở, kể cả người gửi.
+
+Thử thách 3 phút (An, Bình trong nhóm `lop-hoc-01`; Chi không ở nhóm nào):
+
+| Lời gọi | An | Bình | Chi | Phạm vi |
+|---|---|---|---|---|
+| ① An gọi `Echo("hi")` | ✓ | ✗ | ✗ | `Clients.Caller` |
+| ② Chi gọi `SendToGroup("lop-hoc-01", "x")` | ✓ | ✓ | ✗ | `Clients.Group` |
+| ③ Bình gọi `Broadcast("y")` | ✓ | ✓ | ✓ | `Clients.All` |
+
+Câu ②: Chi gửi được vào nhóm nhưng Chi không nhận, vì Chi không phải thành viên nhóm (hub ví dụ không kiểm tra quyền gửi).
