@@ -119,3 +119,23 @@ Thử thách 3 phút (An, Bình trong nhóm `lop-hoc-01`; Chi không ở nhóm n
 | ③ Bình gọi `Broadcast("y")` | ✓ | ✓ | ✓ | `Clients.All` |
 
 Câu ②: Chi gửi được vào nhóm nhưng Chi không nhận, vì Chi không phải thành viên nhóm (hub ví dụ không kiểm tra quyền gửi).
+
+## Bước 6: vòng đời kết nối và tự kết nối lại
+
+Máy chủ thêm `OnConnectedAsync` / `OnDisconnectedAsync` (in `[Hub] + ... ket noi`, gửi `SystemMessage` cho tất cả). Máy khách thêm `On("SystemMessage")` và 3 sự kiện `Reconnecting`, `Reconnected`, `Closed`.
+
+Trước khi tắt máy chủ – máy chủ in `[Hub] + hX8OHTyo ket noi`, An nhận `[System] Client hX8OHTyo da ket noi.`:
+
+![truoc khi tat](anh/buoc6-truoc-khi-tat.png)
+
+Thí nghiệm: tắt máy chủ (Ctrl+C), vài giây sau chạy lại. Trái: An, phải: máy chủ chạy lại:
+
+![noi lai](anh/buoc6-noilai.png)
+
+Thấy: An in `[Lifecycle] Dang ket noi lai...` rồi `[Lifecycle] Da ket noi lai: _-2n_BG1` và `[System] Client _-2n_BG1 da ket noi.`; máy chủ mới in `[Hub] + _-2n_BG1 ket noi`.
+
+Giải thích:
+- `WithAutomaticReconnect()` thử lại theo lịch mặc định 0 s, 2 s, 10 s, 30 s; hết 4 lần thì `Closed`.
+- **ConnectionId đổi** (`hX8OHTyo` → `_-2n_BG1`): máy chủ coi đây là kết nối MỚI.
+- **Nhóm bị mất**: nhóm gắn với ConnectionId cũ; muốn ở lại nhóm phải gọi lại `JoinGroup` trong `Reconnected`.
+- **Tin gửi lúc rớt mạng bị mất hẳn**: SignalR không lưu tin để gửi lại.
