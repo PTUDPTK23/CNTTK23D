@@ -91,3 +91,17 @@ Trang thai doc lai bang REST: graded
 **Máy chủ:** `[Hub] sr3n_2uM theo doi submission:020c4d58…` → `[Push] … -> processing` → `[Push] … -> graded`.
 
 Kiểm tra: đủ 8 dòng, 2 dòng "Thong bao SignalR" cách nhau 2 giây ✓. Hai cập nhật đến từ máy chủ mà máy khách không hề hỏi. Ảnh: `rs-b6-client-sv001.png`, `rs-b6-may-chu.png`.
+
+## Bước 7: năm thí nghiệm phân tán (slide 58–60)
+
+Dự đoán ghi **trước** khi chạy (slide 58), sau đó chạy và so sánh. Sau mỗi thí nghiệm, máy khách được trả về đúng mã nguồn ban đầu.
+
+| # | Thí nghiệm | Dự đoán | Kết quả thật | Giải thích | Ảnh |
+|---|---|---|---|---|---|
+| 1 | Chạy 2 máy khách SV001 và SV002 **cùng lúc** | Mỗi máy khách chỉ nhận thông báo của lượt nộp mình tạo | Máy chủ in xen kẽ 2 lượt nộp (`90347484…`, `70ad97f8…`); cửa sổ SV001 chỉ có `70ad97f8… -> processing/graded`, SV002 chỉ có lượt nộp của SV002 | Mỗi máy khách vào nhóm `submission:{id}` riêng; `Clients.Group` tách người nhận nên không trộn lẫn | `rs-b7-tn1-may-chu.png`, `rs-b7-tn1-sv001.png`, `rs-b7-tn1-sv002.png` |
+| 2 | Chạy máy khách khi **máy chủ chưa chạy** | Lỗi kết nối, chương trình dừng | `HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:5000)` | `StartAsync` gọi negotiate qua HTTP, không có tiến trình nghe cổng 5000. `WithAutomaticReconnect` không thử lại lần nối đầu tiên | `rs-b7-tn2-may-chu-chua-chay.png` |
+| 3 | Sửa `WithUrl` thành `/hub/submissions` | Lỗi 404 | `HttpRequestException: Response status code does not indicate success: 404 (Not Found)` tại `NegotiateAsync` | Lỗi ở bước negotiate; đường dẫn phải khớp `MapHub("/hubs/submissions")` | `rs-b7-tn3-sai-duong-dan.png` |
+| 4 | Sửa `On("SubmissionStatusChanged")` thành `On("SubmissionStatusChange")` | Không lỗi, không có dòng "Thong bao SignalR" | Không lỗi nào; 10 giây sau in `Qua thoi gian cho thong bao graded.`; REST đọc lại vẫn `graded` | Máy chủ vẫn gửi `SubmissionStatusChanged` nhưng không có hàm nào nghe tên đó → bị bỏ qua im lặng. Sai tên chiều xuống = im lặng | `rs-b7-tn4-sai-ten-su-kien.png` |
+| 5 | Chờ 4 giây rồi mới gọi `WatchSubmission` | Lỡ cả 2 thông báo, REST vẫn `graded` | Không nhận tin nào; `Qua thoi gian cho thong bao graded.`; `Trang thai doc lai bang REST: graded` | Chấm xong sau ~3 giây, trước khi vào nhóm; SignalR không lưu tin cho người vào nhóm muộn. REST là nguồn sự thật | `rs-b7-tn5-watch-muon.png` |
+
+**Bài học:** thông điệp thời gian thực có thể bị lỡ; thiết kế đúng là **push để nhanh + REST để chắc**. Trật tự đúng ở máy khách (slide 60): **nghe (`On`) → nối (`StartAsync`) → tạo (`POST`) → theo dõi (`WatchSubmission`) → đọc lại (`GET`)**. Không nhận được thông báo thì kiểm tra theo thứ tự: cổng → đường dẫn hub → Watch đúng id sau POST → tên thông điệp.
