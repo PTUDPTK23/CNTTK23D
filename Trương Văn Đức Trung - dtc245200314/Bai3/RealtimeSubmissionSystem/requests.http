@@ -1,0 +1,44 @@
+@host = http://localhost:5000
+
+### 1. API đang chạy - 200
+GET {{host}}/
+
+### 2. Danh sách bài tập - 200
+GET {{host}}/api/assignments
+
+### 3. Tạo lượt nộp hợp lệ - 201 + Location, status received
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200314",
+  "repositoryUrl": "https://github.com/dtc245200314-del/CNTTK23D"
+}
+
+### 4. Đọc trạng thái lượt nộp (gửi lại sau vài giây để thấy processing rồi graded)
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Thiếu studentCode và repositoryUrl - 400
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{}
+
+### 6. Bài tập không tồn tại - 404
+POST {{host}}/api/assignments/999/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200314",
+  "repositoryUrl": "https://github.com/dtc245200314-del/CNTTK23D"
+}
+
+### 7. Lượt nộp không tồn tại - 404
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. SignalR negotiate - 200 và connectionId
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Sai đường dẫn hub - 404
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
