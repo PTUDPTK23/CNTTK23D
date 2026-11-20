@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.SignalR;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
 var app = builder.Build();
@@ -29,7 +31,11 @@ app.MapGet("/api/assignments/{assignmentId:int}", (int assignmentId) =>
         : Results.Ok(assignment);
 });
 
-app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId, CreateSubmissionRequest request) =>
+app.MapPost("/api/assignments/{assignmentId:int}/submissions", (
+    int assignmentId,
+    CreateSubmissionRequest request,
+    IHubContext<SubmissionHub> hubContext,
+    IHostApplicationLifetime lifetime) =>
 {
     var assignment = assignments.FirstOrDefault(item => item.Id == assignmentId);
     if (assignment is null)
@@ -62,6 +68,8 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions", (int assignmentId
         submissions.Add(submission);
     }
 
+    _ = GradeSubmissionAsync(submission.Id, hubContext, lifetime.ApplicationStopping);
+
     return Results.Created($"/api/submissions/{submission.Id}", submission);
 });
 
@@ -77,6 +85,46 @@ app.MapGet("/api/submissions/{submissionId:guid}", (Guid submissionId) =>
 });
 
 app.Run();
+
+async Task GradeSubmissionAsync(
+    Guid submissionId,
+    IHubContext<SubmissionHub> hubContext,
+    CancellationToken cancellationToken)
+{
+    await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+    await UpdateSubmissionStatusAsync(submissionId, "grading", hubContext, cancellationToken);
+
+    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+    await UpdateSubmissionStatusAsync(submissionId, "graded", hubContext, cancellationToken);
+}
+
+async Task UpdateSubmissionStatusAsync(
+    Guid submissionId,
+    string status,
+    IHubContext<SubmissionHub> hubContext,
+    CancellationToken cancellationToken)
+{
+    SubmissionDto? updatedSubmission;
+    lock (submissionsLock)
+    {
+        var index = submissions.FindIndex(item => item.Id == submissionId);
+        if (index < 0)
+        {
+            return;
+        }
+
+        updatedSubmission = submissions[index] with
+        {
+            Status = status,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        submissions[index] = updatedSubmission;
+    }
+
+    await hubContext.Clients
+        .Group(SubmissionHub.GroupName(submissionId))
+        .SendAsync("SubmissionStatusChanged", updatedSubmission, cancellationToken);
+}
 
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
 record ApiError(string Code, string Message);
