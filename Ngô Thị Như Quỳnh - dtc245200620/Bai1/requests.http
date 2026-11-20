@@ -1,0 +1,44 @@
+@baseUrl = http://localhost:5000
+
+### Kiem tra dich vu
+GET {{baseUrl}}/
+
+### Lay danh sach bai tap
+GET {{baseUrl}}/api/assignments
+
+### Tao luot nop hop le
+# @name createSubmission
+POST {{baseUrl}}/api/submissions
+Content-Type: application/json
+
+{
+  "assignmentId": 1,
+  "studentCode": "DTC245200620",
+  "repositoryUrl": "https://github.com/DTC245200620/CNTTK23D"
+}
+
+### Ma sinh vien rong phai tra 400
+POST {{baseUrl}}/api/submissions
+Content-Type: application/json
+
+{
+  "assignmentId": 1,
+  "studentCode": "",
+  "repositoryUrl": "https://github.com/DTC245200620/CNTTK23D"
+}
+
+### Ma bai tap khong hop le phai tra 400
+POST {{baseUrl}}/api/submissions
+Content-Type: application/json
+
+{
+  "assignmentId": 0,
+  "studentCode": "DTC245200620",
+  "repositoryUrl": "https://github.com/DTC245200620/CNTTK23D"
+}
+
+### Doc lai luot nop vua tao
+GET {{baseUrl}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### ID khong ton tai phai tra 404
+GET {{baseUrl}}/api/submissions/00000000-0000-0000-0000-000000000000
