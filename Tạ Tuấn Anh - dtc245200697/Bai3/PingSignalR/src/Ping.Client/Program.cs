@@ -16,6 +16,18 @@ connection.On<string>("GroupMessage",
  m => Console.WriteLine($"[Group] {m}"));
 
 // ③ Mở kết nối: negotiate + chọn WebSocket
+connection.On<string>("SystemMessage",
+ m => Console.WriteLine($"[System] {m}"));
+connection.Reconnecting += _ => {
+ Console.WriteLine("[Lifecycle] Dang ket noi lai...");
+ return Task.CompletedTask; };
+connection.Reconnected += newId => {
+ Console.WriteLine($"[Lifecycle] Da ket noi lai: {newId?[..8]}");
+ return Task.CompletedTask; };
+connection.Closed += _ => {
+ Console.WriteLine("[Lifecycle] Ket noi da dong.");
+ return Task.CompletedTask; };
+
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi.");
 // Gọi phương thức Echo trên hub
