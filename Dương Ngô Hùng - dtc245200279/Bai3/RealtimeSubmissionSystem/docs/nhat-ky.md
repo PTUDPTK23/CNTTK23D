@@ -105,3 +105,21 @@ Dự đoán ghi **trước** khi chạy (slide 58), sau đó chạy và so sánh
 | 5 | Chờ 4 giây rồi mới gọi `WatchSubmission` | Lỡ cả 2 thông báo, REST vẫn `graded` | Không nhận tin nào; `Qua thoi gian cho thong bao graded.`; `Trang thai doc lai bang REST: graded` | Chấm xong sau ~3 giây, trước khi vào nhóm; SignalR không lưu tin cho người vào nhóm muộn. REST là nguồn sự thật | `rs-b7-tn5-watch-muon.png` |
 
 **Bài học:** thông điệp thời gian thực có thể bị lỡ; thiết kế đúng là **push để nhanh + REST để chắc**. Trật tự đúng ở máy khách (slide 60): **nghe (`On`) → nối (`StartAsync`) → tạo (`POST`) → theo dõi (`WatchSubmission`) → đọc lại (`GET`)**. Không nhận được thông báo thì kiểm tra theo thứ tự: cổng → đường dẫn hub → Watch đúng id sau POST → tên thông điệp.
+
+## Bước 8: requests.http – 9 ca (slide 61)
+
+`requests.http` (extension REST Client) gom 9 ca; để chụp minh chứng, `tests/chay-9-ca.ps1` chạy đúng 9 ca đó bằng `curl.exe` và in mã HTTP.
+
+| Ca | Yêu cầu | Mong đợi | Thực tế |
+|---|---|---|---|
+| 1 | `GET /` | 200 | 200 |
+| 2 | `GET /api/assignments` | 200 | 200 |
+| 3 | `POST /api/assignments/1/submissions` hợp lệ | 201 + Location, `received` | 201, `received` |
+| 4 | `GET /api/submissions/{id}` | 200; bấm lại thấy trạng thái đổi | 200; sau 4 giây `graded` |
+| 5 | `POST` thiếu `studentCode`, `repositoryUrl` | 400 | 400 |
+| 6 | `POST /api/assignments/99/submissions` | 404 | 404 |
+| 7 | `GET /api/submissions/0000…` | 404 | 404 |
+| 8 | `POST /hubs/submissions/negotiate` | 200 | 200 |
+| 9 | `POST /hub/submissions/negotiate` (sai) | 404 | 404 |
+
+Cả 9 ca đúng mã mong đợi ✓ — ảnh `rs-b8-may-chu.png`, `rs-b8-requests-9-ca.png`.
