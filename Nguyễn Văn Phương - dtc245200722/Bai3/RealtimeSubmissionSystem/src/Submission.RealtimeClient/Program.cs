@@ -28,6 +28,42 @@ connection.On<SubmissionStatusMessage>("SubmissionStatusChanged", m => {
 await connection.StartAsync();
 Console.WriteLine("Da ket noi SignalR.");
 
+// ① REST: lấy danh sách bài tập, chọn bài đầu tiên
+var assignments = await http.GetFromJsonAsync<List<AssignmentDto>>("/api/assignments");
+var selected = assignments?.FirstOrDefault();
+if (selected is null) {
+    Console.WriteLine("Khong co bai tap nao.");
+    return;
+}
+Console.WriteLine($"Chon bai tap: {selected.Id} - {selected.Title}");
+
+// ② REST: tạo lượt nộp, kiểm tra 201 TRƯỚC khi đọc body
+var createResponse = await http.PostAsJsonAsync(
+    $"/api/assignments/{selected.Id}/submissions",
+    new CreateSubmissionRequest(studentCode, $"https://example.com/{studentCode}/signalr"));
+if (createResponse.StatusCode != HttpStatusCode.Created) {
+    var error = await createResponse.Content.ReadFromJsonAsync<ApiError>();
+    Console.WriteLine($"Loi {(int)createResponse.StatusCode}: {error?.Code} - {error?.Message}");
+    return;
+}
+var created = await createResponse.Content.ReadFromJsonAsync<SubmissionDto>();
+Console.WriteLine($"Da tao luot nop: {created!.Id}");
+Console.WriteLine($"Trang thai REST ban dau: {created.Status}");
+
+// ③ SignalR: vào nhóm submission:{id}
+await connection.InvokeAsync("WatchSubmission", created.Id.ToString());
+Console.WriteLine("Dang cho thong bao trang thai tu may chu...");
+
+// ④ Chờ chuông graded hoặc hết 10 giây, cái nào xong trước
+var completed = await Task.WhenAny(gradedNotification.Task,
+                                   Task.Delay(TimeSpan.FromSeconds(10)));
+if (completed != gradedNotification.Task)
+    Console.WriteLine("Qua thoi gian cho thong bao graded.");
+
+// ⑤ REST: chốt trạng thái cuối (REST là nguồn sự thật)
+var latest = await http.GetFromJsonAsync<SubmissionDto>($"/api/submissions/{created.Id}");
+Console.WriteLine($"Trang thai doc lai bang REST: {latest?.Status}");
+
 // Hợp đồng dữ liệu: máy khách tự khai báo, không tham chiếu code máy chủ
 record AssignmentDto(int Id, string Title, string Description, bool IsOpen);
 record CreateSubmissionRequest(string StudentCode, string RepositoryUrl);
