@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "dgSpecHash": "9f6fCaeaRA8=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\MINGHUI\\Downloads\\Bai3\\PingSignalR\\src\\Ping.Client\\Ping.Client.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\11.0.0\\microsoft.aspnetcore.connections.abstractions.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.http.connections.client\\11.0.0\\microsoft.aspnetcore.http.connections.client.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.http.connections.common\\11.0.0\\microsoft.aspnetcore.http.connections.common.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.signalr.client\\11.0.0\\microsoft.aspnetcore.signalr.client.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.signalr.client.core\\11.0.0\\microsoft.aspnetcore.signalr.client.core.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.signalr.common\\11.0.0\\microsoft.aspnetcore.signalr.common.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.aspnetcore.signalr.protocols.json\\11.0.0\\microsoft.aspnetcore.signalr.protocols.json.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\11.0.0\\microsoft.bcl.asyncinterfaces.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.bcl.timeprovider\\11.0.0\\microsoft.bcl.timeprovider.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\11.0.0\\microsoft.extensions.dependencyinjection.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\11.0.0\\microsoft.extensions.dependencyinjection.abstractions.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.features\\11.0.0\\microsoft.extensions.features.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.logging\\11.0.0\\microsoft.extensions.logging.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\11.0.0\\microsoft.extensions.logging.abstractions.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.options\\11.0.0\\microsoft.extensions.options.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\microsoft.extensions.primitives\\11.0.0\\microsoft.extensions.primitives.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.diagnostics.diagnosticsource\\11.0.0\\system.diagnostics.diagnosticsource.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.io.pipelines\\11.0.0\\system.io.pipelines.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.net.serversentevents\\11.0.0\\system.net.serversentevents.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.text.encodings.web\\11.0.0\\system.text.encodings.web.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.text.json\\11.0.0\\system.text.json.11.0.0.nupkg.sha512",
+    "C:\\Users\\MINGHUI\\.nuget\\packages\\system.threading.channels\\11.0.0\\system.threading.channels.11.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
