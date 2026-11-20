@@ -88,3 +88,26 @@ Build thành công với 0 cảnh báo và 0 lỗi. Khi dừng rồi chạy lạ
 ![Terminal 1 ghi nhận kết nối của máy khách](docs/buoc6-server.png)
 
 ![Terminal 2 của An tự kết nối lại với ConnectionId mới](docs/buoc6-noilai.png)
+
+## Bước 7 – Ba thí nghiệm lỗi kết nối
+
+| Ca | Thao tác | Kết quả quan sát | Giải thích |
+| --- | --- | --- | --- |
+| 1. Máy chủ chưa chạy | Chạy `Ping.Client` khi `Ping.Api` đã dừng. | `HttpRequestException` báo kết nối bị từ chối. | `StartAsync()` thất bại khi mở kết nối lần đầu. `WithAutomaticReconnect()` áp dụng sau khi đã kết nối thành công. |
+| 2. Sai đường dẫn hub | Chạy bản client thử nghiệm dùng `/hub/ping` khi máy chủ vẫn ánh xạ `/hubs/ping`. | `HttpRequestException` báo `404 (Not Found)`. | Yêu cầu negotiate đi đến đường dẫn thiếu chữ `s`. |
+| 3. Sai tên thông điệp | Chạy bản client thử nghiệm đăng ký `EchoRespone` trong khi hub gửi `EchoResponse`. | Client kết nối, nhận tin nhóm và tin phát rộng. Dòng `[Echo]` không xuất hiện và ứng dụng tiếp tục chờ. | Máy khách chỉ gọi hàm xử lý khi tên sự kiện khớp với tên hub gửi. |
+
+Cả solution build thành công với 0 cảnh báo và 0 lỗi. Hai biến thể được chạy từ bản sao tạm. Chạy lại client gốc cho kết quả `[Echo] Echo: Xin chao SignalR tu An`.
+
+| Phạm vi gửi | Ai nhận | Ví dụ trong EduSubmit |
+| --- | --- | --- |
+| `Clients.All` | Mọi kết nối đang mở | Thông báo có bài tập mới. |
+| `Clients.Caller` | Kết nối vừa gọi hub | Xác nhận yêu cầu đăng ký theo dõi lượt nộp. |
+| `Clients.Group(name)` | Thành viên của nhóm | Gửi trạng thái lượt nộp đến nhóm `submission:{id}`. |
+| `Clients.Client(id)` | Kết nối mang đúng `ConnectionId` | Gửi thông báo riêng tới một phiên làm việc. |
+
+![Ca 1 — Kết nối bị từ chối khi máy chủ tắt](docs/buoc7-loi1.png)
+
+![Ca 2 — Sai đường dẫn hub trả HTTP 404](docs/buoc7-loi2.png)
+
+![Ca 3 — Client vẫn nhận tin nhóm khi đăng ký sai tên EchoResponse](docs/buoc7-loi3.png)
