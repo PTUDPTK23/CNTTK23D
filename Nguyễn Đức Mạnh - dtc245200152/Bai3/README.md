@@ -340,3 +340,50 @@ Thí nghiệm 5 – chờ 4 giây rồi mới `WatchSubmission` (máy khách, r�
 | 5 | Không nhận tin nào, REST ra graded | Không có dòng "Thong bao SignalR", hết 10 giây; REST đọc ra `graded`. Máy chủ in `[Push] processing`, `[Push] graded` **trước** `[Hub] ... theo doi` | Đúng | Chấm xong sau 3 giây nhưng máy khách vào nhóm sau 4 giây: tin đã gửi cho nhóm lúc chưa có ai → **lỡ tin**, SignalR không lưu để gửi lại. **REST là nguồn sự thật**: luôn đọc lại bằng GET khi kết thúc hoặc khi nối lại. |
 
 Bài học chung: thông điệp thời gian thực có thể bị lỡ. Thiết kế đúng = **push để nhanh + REST để chắc**. Sau mỗi thí nghiệm code đã được trả về như cũ, build `0 Error(s)`.
+
+## EduSubmit – Bước 8: requests.http gom các ca REST và bước bắt tay của hub
+
+Tệp `RealtimeSubmissionSystem/requests.http` có **10 ca** (9 ca theo slide + ca bài tập đã đóng). Có thể bấm **Send Request** từng ca trong VS Code (REST Client); ảnh dưới chạy lần lượt cùng 10 ca bằng `curl.exe` và so mã trạng thái với mong đợi:
+
+![requests](anhchupminhchung/edusubmit-buoc8-requests.png)
+
+| Ca | Yêu cầu | Mong đợi | Thực tế |
+|---|---|---|---|
+| 1 | `GET /` | 200 | 200 |
+| 2 | `GET /api/assignments` | 200 | 200 |
+| 3 | `POST /api/assignments/1/submissions` hợp lệ | 201 + Location | 201 |
+| 4 | `GET /api/submissions/{id}` (theo Location) | 200, sau 5 giây `graded` | 200, `graded` |
+| 5 | POST thiếu `studentCode`, `repositoryUrl` | 400 | 400 |
+| 6 | `POST /api/assignments/99/submissions` | 404 | 404 |
+| 7 | `GET /api/submissions/0000...` | 404 | 404 |
+| 8 | `POST /hubs/submissions/negotiate` | 200 + connectionId | 200 |
+| 9 | `POST /hub/submissions/negotiate` (sai hub) | 404 | 404 |
+| 10 | `POST /api/assignments/3/submissions` (bài đã đóng) | 400 | 400 |
+
+---
+
+# Trả lời 3 câu hỏi đầu giờ
+
+**1. Máy chủ có thể chủ động báo cho máy khách không?**
+Có, nếu máy khách mở sẵn một **kết nối lâu dài** (WebSocket qua SignalR). Máy chủ gửi bằng `Clients.Group("submission:{id}").SendAsync("SubmissionStatusChanged", msg)`; khi gửi từ ngoài hub (tác vụ chấm nền) thì dùng `IHubContext<SubmissionHub>`. Trong bài: máy khách không hỏi lại mà vẫn nhận `processing` rồi `graded` (bước 6).
+
+**2. REST và SignalR chia việc thế nào?**
+REST **tạo và đọc** tài nguyên với mã trạng thái rõ ràng (POST 201/400/404, GET 200/404) và là **nguồn sự thật**. SignalR chỉ **đẩy các thay đổi** phát sinh sau yêu cầu ban đầu (received → processing → graded) để máy khách biết sớm, không phải polling. SignalR **không thay thế** REST: tạo lượt nộp bằng REST, theo dõi bằng SignalR, chốt trạng thái cuối bằng REST.
+
+**3. Đứt mạng đúng lúc máy chủ báo graded thì sao?**
+Tin đó **mất** – SignalR không lưu tin để gửi lại (thí nghiệm 5 cho thấy vào nhóm muộn là lỡ tin). `WithAutomaticReconnect` nối lại với **ConnectionId mới** nên nhóm cũ cũng mất; máy khách phải gọi lại `WatchSubmission(id)` và gọi `GET /api/submissions/{id}` để lấy trạng thái cuối. **Push để nhanh, REST để chắc.**
+
+---
+
+# Danh sách kiểm tra trước khi mở PR
+
+| Yêu cầu | Đạt |
+|---|---|
+| `dotnet build` cả 2 solution: 0 Error(s) | ✔ |
+| Không commit `bin/`, `obj/` (`.gitignore`) | ✔ |
+| `requests.http` đủ 9 ca (có 10 ca) | ✔ |
+| README: kết quả chạy máy khách 8 dòng | ✔ (bước 6) |
+| README: 5 thí nghiệm (dự đoán + thật) | ✔ (bước 7) |
+| README: trả lời 3 câu hỏi đầu giờ | ✔ |
+| Mỗi bước ≥ 1 commit | ✔ |
+| PR: "Bai3 - dtc245200152 - Nguyễn Đức Mạnh" | (khi nộp) |

@@ -1,0 +1,45 @@
+@host = http://localhost:5000
+
+### 1. Kiem tra may chu dang chay -> 200
+GET {{host}}/
+
+### 2. Danh sach bai tap -> 200
+GET {{host}}/api/assignments
+
+### 3. Tao luot nop -> 201 + Location, status = received
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV001",
+  "repositoryUrl": "https://example.com/sv001/signalr" }
+
+### 4. Doc lai luot nop vua tao -> 200 (bam nhieu lan: received -> processing -> graded)
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Nop bai thieu du lieu -> 400 + ApiError (INVALID_SUBMISSION)
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{ "studentCode": "", "repositoryUrl": "" }
+
+### 6. Nop bai cho bai tap 99 khong ton tai -> 404 + ApiError (ASSIGNMENT_NOT_FOUND)
+POST {{host}}/api/assignments/99/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV001", "repositoryUrl": "https://example.com/sv001/signalr" }
+
+### 7. Doc luot nop voi id rong -> 404 + ApiError (SUBMISSION_NOT_FOUND)
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. Bat tay SignalR (negotiate) -> 200 + connectionId
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Sai duong dan hub -> 404
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
+
+### 10. Nop bai cho bai tap da dong -> 400 + ApiError (ASSIGNMENT_CLOSED)
+POST {{host}}/api/assignments/3/submissions
+Content-Type: application/json
+
+{ "studentCode": "SV001", "repositoryUrl": "https://example.com/sv001/signalr" }
