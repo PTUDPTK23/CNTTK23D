@@ -267,3 +267,28 @@ Code `src/Submission.RealtimeClient/Program.cs` phần 1: `HttpClient` (kênh RE
 Thấy: máy khách in `Da ket noi SignalR.`
 
 Giải thích: một URL gốc dùng cho cả hai kênh. `On<SubmissionStatusMessage>` – SignalR tự chuyển JSON thành record. `TaskCompletionSource` là một `Task` "bấm tay": hoàn tất khi gọi `TrySetResult`, dùng để chờ một sự kiện (thông báo `graded`).
+
+## EduSubmit – Bước 6: tạo bằng REST, theo dõi bằng SignalR, chốt lại bằng REST
+
+Code máy khách phần 2: (1) `GET /api/assignments` chọn bài đầu tiên → (2) `POST` tạo lượt nộp, kiểm tra mã `201` trước khi đọc body (lỗi thì in `ApiError`) → (3) `InvokeAsync("WatchSubmission", id)` vào nhóm → (4) `Task.WhenAny(chuông graded, 10 giây)` → (5) `GET /api/submissions/{id}` đọc lại.
+
+Terminal 1 – máy chủ (trái), Terminal 2 – máy khách SV001 (phải):
+
+![graded](anhchupminhchung/edusubmit-buoc6-graded.png)
+
+Kết quả máy khách (8 dòng):
+
+```
+Da ket noi SignalR.
+Chon bai tap: 1 - Bai tap SignalR
+Da tao luot nop: b36e60ef-c315-4c15-aa66-4a6991f8250b
+Trang thai REST ban dau: received
+Dang cho thong bao trang thai tu may chu...
+Thong bao SignalR: b36e60ef-... -> processing luc 09:13:25
+Thong bao SignalR: b36e60ef-... -> graded luc 09:13:27
+Trang thai doc lai bang REST: graded
+```
+
+Thấy: 2 dòng "Thong bao SignalR" cách nhau 2 giây, đến từ máy chủ mà máy khách **không hề hỏi**; máy khách tự thoát sau khi đọc lại `graded`. Máy chủ in `[Hub] ... theo doi submission:...` → `[Push] ... processing` → `[Push] ... graded`.
+
+Giải thích: thứ tự đúng là **nghe → nối → tạo → theo dõi → đọc lại** (`On` → `StartAsync` → POST → `WatchSubmission(id)` → GET). `WatchSubmission` chỉ gọi được sau POST vì cần id. Trạng thái cuối luôn lấy từ REST (quy tắc vàng) – push để nhanh, REST để chắc.
