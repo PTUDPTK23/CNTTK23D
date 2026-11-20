@@ -1,0 +1,26 @@
+@host = http://localhost:5000
+
+GET {{host}}/
+GET {{host}}/api/assignments
+
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{"studentCode":"SV001","repositoryUrl":"https://example.com/sv001/signalr"}
+
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{"studentCode":"","repositoryUrl":""}
+
+POST {{host}}/api/assignments/999/submissions
+Content-Type: application/json
+
+{"studentCode":"SV001","repositoryUrl":"https://example.com/sv001/signalr"}
+
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
