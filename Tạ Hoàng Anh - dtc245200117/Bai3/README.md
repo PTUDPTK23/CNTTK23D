@@ -155,3 +155,11 @@ Build thành công với 0 lỗi. Ba lần GET theo `Location` lần lượt tr�
 ![POST trả 201 và ba lần GET lần lượt trả received, processing, graded](docs/edusubmit-buoc4-trangthai.png)
 
 ![Lệnh GET theo ID lượt nộp trả trạng thái graded](docs/edusubmit-buoc4-get-graded.png)
+
+### Bước 5 – Máy khách mở hai kênh và chờ trạng thái
+
+Máy khách tạo `HttpClient` cho REST và `HubConnection` cho SignalR từ cùng địa chỉ API. Client đăng ký nhận `SubmissionStatusChanged` trước khi kết nối và dùng `TaskCompletionSource` để báo khi nhận trạng thái `graded`.
+
+Build thành công với 0 lỗi. Chạy client khi máy chủ đang hoạt động in `Da ket noi SignalR.`. Phần tạo lượt nộp và chờ trạng thái sẽ được thêm ở Bước 6.
+
+![Terminal 2 chạy máy khách và kết nối SignalR thành công](docs/edusubmit-buoc5-ketnoi.png)
