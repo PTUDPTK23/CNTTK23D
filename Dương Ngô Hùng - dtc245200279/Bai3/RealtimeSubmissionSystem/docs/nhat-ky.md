@@ -123,3 +123,16 @@ Dự đoán ghi **trước** khi chạy (slide 58), sau đó chạy và so sánh
 | 9 | `POST /hub/submissions/negotiate` (sai) | 404 | 404 |
 
 Cả 9 ca đúng mã mong đợi ✓ — ảnh `rs-b8-may-chu.png`, `rs-b8-requests-9-ca.png`.
+
+## Vận dụng – Bài tập 2: trạng thái failed (slide 62)
+
+- **Máy chủ:** khi `POST`, nếu `RepositoryUrl` không bắt đầu bằng `https://` thì trạng thái cuối do `SimulateGradingAsync` đặt là `failed` thay vì `graded` (vẫn qua `processing`, vẫn lưu trước rồi đẩy qua nhóm).
+- **Máy khách:** tham số thứ 3 (tùy chọn) là kho mã nguồn; nhận `failed` thì in cảnh báo **màu đỏ** và kết thúc chờ ngay (không đợi hết 10 giây).
+- Câu hỏi khung bị ảnh hưởng: ① (thêm một sự kiện kích hoạt: chuyển sang `failed`) và ③ (`Status` trong thông điệp có thêm giá trị `failed`).
+
+| Lệnh | Kết quả |
+|---|---|
+| `… SV001` (kho `https://…`) | `processing` → `graded`; REST đọc lại `graded` |
+| `… SV002 http://example.com/sv002/signalr` | `processing` → `failed`; `!!! CANH BAO: luot nop … cham LOI (failed)` (đỏ); REST đọc lại `failed` |
+
+Ảnh: `rs-bt2-may-chu.png`, `rs-bt2-hop-le-graded.png`, `rs-bt2-http-failed.png`.

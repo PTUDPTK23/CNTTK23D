@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 var apiBaseUrl = args.Length > 0 ? args[0].TrimEnd('/') : "http://localhost:5000";
 var studentCode = args.Length > 1 ? args[1] : "SV001";
+// Bài tập 2: tham số thứ 3 (tùy chọn) là kho mã nguồn, để thử trạng thái failed
+var repositoryUrl = args.Length > 2 ? args[2] : $"https://example.com/{studentCode}/signalr";
 
 // Kênh 1: REST
 using var http = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
@@ -20,6 +22,14 @@ var gradedNotification = new TaskCompletionSource();   // "cái chuông" chờ t
 connection.On<SubmissionStatusMessage>("SubmissionStatusChanged", m =>
 {
     Console.WriteLine($"Thong bao SignalR: {m.SubmissionId} -> {m.Status} luc {m.UpdatedAt.ToLocalTime():HH:mm:ss}");
+    if (m.Status == "failed")
+    {
+        // Bài tập 2: trạng thái cuối failed → cảnh báo màu đỏ, không phải chờ hết 10 giây
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"!!! CANH BAO: luot nop {m.SubmissionId} cham LOI (failed)");
+        Console.ResetColor();
+        gradedNotification.TrySetResult();
+    }
     if (m.Status == "graded") gradedNotification.TrySetResult();
 });
 
@@ -39,7 +49,7 @@ Console.WriteLine($"Chon bai tap: {selected.Id} - {selected.Title}");
 // ② REST: tạo lượt nộp; kiểm tra 201 TRƯỚC khi đọc body
 var createResponse = await http.PostAsJsonAsync(
     $"/api/assignments/{selected.Id}/submissions",
-    new CreateSubmissionRequest(studentCode, $"https://example.com/{studentCode}/signalr"));
+    new CreateSubmissionRequest(studentCode, repositoryUrl));
 if (createResponse.StatusCode != HttpStatusCode.Created)
 {
     var error = await createResponse.Content.ReadFromJsonAsync<ApiError>();

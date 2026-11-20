@@ -67,7 +67,10 @@ app.MapPost("/api/assignments/{assignmentId:int}/submissions",
     lock (submissionsLock) { submissions.Add(submission); }
 
     // Khởi động chấm bài ở nền, KHÔNG chờ: POST trả 201 ngay, chấm tiếp tục phía sau
-    _ = SimulateGradingAsync(submission.Id, submissions, submissionsLock, hubContext);
+    // Bài tập 2: kho mã nguồn không bắt đầu bằng https:// thì chấm lỗi (failed)
+    var finalStatus = submission.RepositoryUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+        ? "graded" : "failed";
+    _ = SimulateGradingAsync(submission.Id, finalStatus, submissions, submissionsLock, hubContext);
 
     return Results.Created($"/api/submissions/{submission.Id}", submission);
 });
@@ -90,14 +93,14 @@ app.MapHub<SubmissionHub>("/hubs/submissions");   // trước app.Run()
 // ④ Chạy
 app.Run();
 
-// Mô phỏng chấm bài ở nền: received → (1 giây) processing → (2 giây) graded
-static async Task SimulateGradingAsync(Guid id, List<SubmissionDto> list,
+// Mô phỏng chấm bài ở nền: received → (1 giây) processing → (2 giây) graded hoặc failed
+static async Task SimulateGradingAsync(Guid id, string finalStatus, List<SubmissionDto> list,
     object gate, IHubContext<SubmissionHub> hub)
 {
     await Task.Delay(TimeSpan.FromSeconds(1));
     await UpdateStatusAsync(id, "processing", list, gate, hub);
     await Task.Delay(TimeSpan.FromSeconds(2));
-    await UpdateStatusAsync(id, "graded", list, gate, hub);
+    await UpdateStatusAsync(id, finalStatus, list, gate, hub);
 }
 
 // Lưu trước, đẩy sau: ai đọc REST ngay khi nhận tin đều thấy đúng trạng thái
