@@ -1,0 +1,47 @@
+@api = http://localhost:5000
+
+### 1. Kiem tra may chu dang chay -> 200 OK
+GET {{api}}/
+
+### 2. Danh sach bai tap -> 200 OK
+GET {{api}}/api/assignments
+
+### 3. Tao luot nop hop le -> 201 Created + Header Location
+# @name createSubmission
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200402",
+  "repositoryUrl": "https://github.com/dtc245200402-bit/V-Duy-Linh-dtc245200402"
+}
+
+### 4. Doc lai luot nop vua tao -> 200 OK (bam lai sau 1s, 3s de xem processing -> graded)
+GET {{api}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Thieu studentCode hoac repositoryUrl -> 400 Bad Request
+POST {{api}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "",
+  "repositoryUrl": ""
+}
+
+### 6. Bai tap khong ton tai -> 404 Not Found
+POST {{api}}/api/assignments/99/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "DTC245200402",
+  "repositoryUrl": "https://github.com/dtc245200402-bit/V-Duy-Linh-dtc245200402"
+}
+
+### 7. Luot nop khong ton tai -> 404 Not Found
+GET {{api}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. Negotiate dung duong dan -> 200 OK
+POST {{api}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Negotiate sai duong dan (thieu chu s) -> 404 Not Found
+POST {{api}}/hub/submissions/negotiate?negotiateVersion=1

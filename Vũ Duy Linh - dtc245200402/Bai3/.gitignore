@@ -1,0 +1,9 @@
+## Ignore build output and IDE temporary files
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+build.log
