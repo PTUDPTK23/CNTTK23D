@@ -17,6 +17,7 @@ var submission = await response.Content.ReadFromJsonAsync<SubmissionDto>()
 Console.WriteLine($"Da nop: {submission.Id} | trang thai REST: {submission.Status}");
 
 var graded = new TaskCompletionSource<SubmissionStatusEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
+var grading = new TaskCompletionSource<SubmissionStatusEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
 await using var connection = new HubConnectionBuilder()
     .WithUrl($"{apiUrl.TrimEnd('/')}/hubs/submissions")
     .WithAutomaticReconnect()
@@ -29,14 +30,26 @@ connection.On<SubmissionStatusEvent>("SubmissionStatusChanged", update =>
     {
         graded.TrySetResult(update);
     }
+    else if (string.Equals(update.Status, "grading", StringComparison.OrdinalIgnoreCase))
+    {
+        grading.TrySetResult(update);
+    }
 });
 
 await connection.StartAsync();
 await connection.InvokeAsync("JoinSubmissionGroup", submission.Id);
 Console.WriteLine($"SignalR da vao nhom luot nop {submission.Id}; dang cho graded...");
 
-await graded.Task.WaitAsync(TimeSpan.FromSeconds(20));
-Console.WriteLine("Nhan duoc thong bao graded. Hoan tat.");
+await Task.WhenAll(
+    grading.Task.WaitAsync(TimeSpan.FromSeconds(20)),
+    graded.Task.WaitAsync(TimeSpan.FromSeconds(20)));
+Console.WriteLine("Da nhan 2 cap nhat tu may chu, client khong hoi REST trong luc cho.");
+
+using var finalResponse = await http.GetAsync($"/api/submissions/{submission.Id}");
+finalResponse.EnsureSuccessStatusCode();
+var finalSubmission = await finalResponse.Content.ReadFromJsonAsync<SubmissionDto>()
+    ?? throw new InvalidOperationException("Khong doc duoc trang thai cuoi qua REST.");
+Console.WriteLine($"REST chot lai: {finalSubmission.Status} | UpdatedAt: {finalSubmission.UpdatedAt:O}");
 
 record CreateSubmissionRequest(string StudentCode, string RepositoryUrl);
 record SubmissionDto(Guid Id, string Status, DateTimeOffset UpdatedAt);
