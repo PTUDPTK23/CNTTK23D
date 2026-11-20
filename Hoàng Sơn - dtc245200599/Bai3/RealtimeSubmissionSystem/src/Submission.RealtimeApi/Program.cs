@@ -1,4 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 var assignments = new List<AssignmentDto>
@@ -15,6 +16,8 @@ app.MapGet("/", () => Results.Ok(new
     service = "Submission.RealtimeApi",
     status = "running"
 }));
+
+app.MapHub<SubmissionHub>("/hubs/submissions");
 
 app.MapGet("/api/assignments", () => Results.Ok(assignments));
 
