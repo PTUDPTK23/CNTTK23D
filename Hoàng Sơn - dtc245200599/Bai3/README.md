@@ -46,3 +46,9 @@ Máy khách gọi Echo với nội dung tin nhắn. Hub dùng Clients.Caller đ�
     dotnet run --project src/Ping.Api --urls http://localhost:5200
 
 Sau khi sửa Program.cs, dừng máy chủ cũ bằng Ctrl+C rồi khởi động lại. Bước 4 sẽ dùng máy khách SignalR để gọi Echo và chụp kết quả cho cả hai bước.
+
+## Bước 4.1 – Kết nối máy khách SignalR
+
+Ping.Client mặc định dùng http://localhost:5200 và nhận địa chỉ máy chủ, tên máy khách qua tham số dòng lệnh. Client đăng ký hàm in EchoResponse trước khi mở kết nối tới /hubs/ping và bật tự kết nối lại.
+
+Kết quả kiểm tra: build thành công, 0 cảnh báo, 0 lỗi.
