@@ -149,3 +149,14 @@ Hai biến thể được chạy từ bản sao tạm của máy khách. Chạy 
 | Clients.Caller | Chỉ kết nối vừa gọi phương thức hub. | Trả Echo về cho người gọi. |
 | Clients.Group(tên) | Các kết nối thuộc nhóm chỉ định. | Báo trạng thái mới cho nhóm theo dõi một lượt nộp. |
 | Clients.Client(id) | Kết nối có ConnectionId được chỉ định. | Gửi riêng thông báo đến một phiên làm việc. |
+
+## EduSubmit – Bước 1: Tạo solution và hai project
+
+Solution RealtimeSubmissionSystem gồm máy chủ ASP.NET Core Submission.RealtimeApi và máy khách console Submission.RealtimeClient. Máy khách tham chiếu Microsoft.AspNetCore.SignalR.Client 10.0.15. Hai project đã được thêm vào solution và .gitignore loại thư mục bin và obj.
+
+Từ thư mục RealtimeSubmissionSystem, chạy:
+
+    dotnet sln list
+    dotnet build --tl:off
+
+Danh sách solution hiện đủ hai project. Kết quả build: 0 cảnh báo, 0 lỗi.
