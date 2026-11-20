@@ -74,3 +74,17 @@ Build thành công với 0 cảnh báo và 0 lỗi. Trong lần kiểm tra hai m
 ![Terminal 2 của An nhận tin nhóm và tin phát rộng từ Bình](buoc5-nhom.png)
 
 ![Terminal 3 hiển thị kết quả của Bình](buoc5-binh.png)
+
+## Bước 6 – Vòng đời kết nối và tự kết nối lại
+
+`PingHub` ghi nhật ký `[Hub]` và gửi `SystemMessage` khi máy khách kết nối hoặc ngắt kết nối. Máy khách đăng ký `Reconnecting`, `Reconnected` và `Closed` trước `StartAsync` để hiển thị trạng thái kết nối.
+
+Build thành công với 0 cảnh báo và 0 lỗi. Khi dừng rồi chạy lại máy chủ trên cổng thử nghiệm, Terminal 2 của An in `[Lifecycle] Dang ket noi lai...` và `[Lifecycle] Da ket noi lai: ...`. `ConnectionId` sau khi nối lại khác với ID ban đầu.
+
+`WithAutomaticReconnect()` dùng các khoảng chờ mặc định 0, 2, 10 và 30 giây giữa các lần thử. Sau khi nối lại, máy khách phải gọi `JoinGroup` nếu muốn tham gia lại nhóm vì tư cách thành viên gắn với kết nối cũ. Các tin gửi khi máy khách mất kết nối sẽ không được phát lại.
+
+Để tái hiện, chạy máy chủ ở Terminal 1 và An ở Terminal 2 như Bước 5. Nhấn Ctrl+C tại Terminal 1 rồi chạy lại máy chủ trên cổng `5200`. Giữ An chạy để thấy cả hai dòng `[Lifecycle]`.
+
+![Terminal 1 ghi nhận kết nối của máy khách](buoc6-server.png)
+
+![Terminal 2 của An tự kết nối lại với ConnectionId mới](buoc6-noilai.png)

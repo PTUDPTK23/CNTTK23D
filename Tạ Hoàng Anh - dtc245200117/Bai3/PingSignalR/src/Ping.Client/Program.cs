@@ -12,6 +12,26 @@ connection.On<string>("EchoResponse", message => Console.WriteLine($"[Echo] {mes
 connection.On<string>("BroadcastMessage", message => Console.WriteLine($"[Broadcast] {message}"));
 connection.On<string>("GroupMessage", message => Console.WriteLine($"[Group] {message}"));
 
+connection.On<string>("SystemMessage", message => Console.WriteLine($"[System] {message}"));
+
+connection.Reconnecting += _ =>
+{
+    Console.WriteLine("[Lifecycle] Dang ket noi lai...");
+    return Task.CompletedTask;
+};
+
+connection.Reconnected += newId =>
+{
+    Console.WriteLine($"[Lifecycle] Da ket noi lai: {newId?[..8]}");
+    return Task.CompletedTask;
+};
+
+connection.Closed += _ =>
+{
+    Console.WriteLine("[Lifecycle] Ket noi da dong.");
+    return Task.CompletedTask;
+};
+
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi.");
 

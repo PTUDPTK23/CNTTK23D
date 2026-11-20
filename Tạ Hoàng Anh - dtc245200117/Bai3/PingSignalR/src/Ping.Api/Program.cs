@@ -29,4 +29,20 @@ sealed class PingHub : Hub
 
     public Task SendToGroup(string groupName, string message)
         => Clients.Group(groupName).SendAsync("GroupMessage", message);
+
+    public override async Task OnConnectedAsync()
+    {
+        var connectionId = Context.ConnectionId[..8];
+        Console.WriteLine($"[Hub] + {connectionId} ket noi");
+        await Clients.All.SendAsync("SystemMessage", $"Client {connectionId} da ket noi.");
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var connectionId = Context.ConnectionId[..8];
+        Console.WriteLine($"[Hub] - {connectionId} ngat");
+        await Clients.All.SendAsync("SystemMessage", $"Client {connectionId} da ngat ket noi.");
+        await base.OnDisconnectedAsync(exception);
+    }
 }
