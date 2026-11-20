@@ -160,3 +160,17 @@ Từ thư mục RealtimeSubmissionSystem, chạy:
     dotnet build --tl:off
 
 Danh sách solution hiện đủ hai project. Kết quả build: 0 cảnh báo, 0 lỗi.
+
+## EduSubmit – Bước 2: API REST và thời điểm cập nhật
+
+Chuyển các tuyến đọc bài tập, tạo và đọc lượt nộp từ Bài 2 sang Submission.RealtimeApi. POST kiểm tra bài tập có tồn tại và còn mở, sau đó kiểm tra mã sinh viên và URL repository. Lượt nộp mới có trạng thái received, với ReceivedAt và UpdatedAt lấy cùng một thời điểm UTC. API dùng chung submissionsLock để khóa thao tác thêm và đọc lượt nộp.
+
+Từ thư mục RealtimeSubmissionSystem, chạy máy chủ:
+
+    dotnet run --project src/Submission.RealtimeApi --urls http://localhost:5000
+
+Trong PowerShell 7 ở cửa sổ thứ hai, gửi một lượt nộp mẫu:
+
+    curl.exe -i http://localhost:5000/api/assignments/1/submissions --json '{"studentCode":"dtc245200599","repositoryUrl":"https://github.com/hoangsondu7-ops/CNTTK23D"}'
+
+Kiểm tra thực tế bằng curl trên cổng 5000: POST trả 201 Created, Location và JSON chứa status là received, có updatedAt. GET địa chỉ trong Location trả 200 và cùng dữ liệu. Bài tập không tồn tại hoặc lượt nộp không tồn tại trả 404. Bài tập đã đóng hoặc dữ liệu thiếu trả 400.
