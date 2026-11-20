@@ -1,0 +1,8 @@
+## .NET Core
+**/bin/
+**/obj/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
