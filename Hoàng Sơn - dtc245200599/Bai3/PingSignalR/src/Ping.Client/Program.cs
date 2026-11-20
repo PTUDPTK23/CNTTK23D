@@ -13,3 +13,8 @@ connection.On<string>("EchoResponse",
 
 await connection.StartAsync();
 Console.WriteLine($"{name} da ket noi den PingApi.");
+
+await connection.InvokeAsync("Echo", $"Xin chao SignalR tu {name}");
+
+Console.WriteLine("Dang cho thong diep... Nhan Enter de thoat.");
+Console.ReadLine();

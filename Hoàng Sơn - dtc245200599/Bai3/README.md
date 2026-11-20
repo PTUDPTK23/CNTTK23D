@@ -52,3 +52,21 @@ Sau khi sửa Program.cs, dừng máy chủ cũ bằng Ctrl+C rồi khởi độ
 Ping.Client mặc định dùng http://localhost:5200 và nhận địa chỉ máy chủ, tên máy khách qua tham số dòng lệnh. Client đăng ký hàm in EchoResponse trước khi mở kết nối tới /hubs/ping và bật tự kết nối lại.
 
 Kết quả kiểm tra: build thành công, 0 cảnh báo, 0 lỗi.
+
+## Bước 4.2 – Gọi Echo và nhận phản hồi
+
+Từ thư mục PingSignalR, chạy máy chủ trong terminal thứ nhất.
+
+    dotnet run --project src/Ping.Api --urls http://localhost:5200
+
+Chạy máy khách trong terminal thứ hai.
+
+    dotnet run --project src/Ping.Client -- http://localhost:5200 An
+
+Máy khách gọi Echo qua InvokeAsync. Khi nhận EchoResponse, nó in phản hồi rồi chờ Enter để thoát.
+
+Kết quả chạy thử trên cổng tạm 49351 vì cổng 5200 đang được máy chủ khác sử dụng.
+
+    An da ket noi den PingApi.
+    [Echo] Echo: Xin chao SignalR tu An
+    Dang cho thong diep... Nhan Enter de thoat.
