@@ -182,3 +182,36 @@ Sau mỗi thí nghiệm code đã được trả về như cũ và build lại `
 | `Clients.Client(id)` | Một ConnectionId cụ thể | (chưa dùng) |
 
 Bốn trụ cột: ① `AddSignalR` + `MapHub` ở máy chủ · ② phương thức hub gửi bằng `Clients.X.SendAsync` · ③ `HubConnectionBuilder` + `On` + `StartAsync` ở máy khách · ④ chọn đúng phạm vi người nhận.
+
+---
+
+# Phần 2 – EduSubmit nhận thông báo trạng thái thời gian thực (RealtimeSubmissionSystem)
+
+Ý chính: giữ nguyên REST của Bài 2 để tạo và đọc lượt nộp; thêm hub `/hubs/submissions` để máy chủ **đẩy** trạng thái `processing`, `graded` tới đúng nhóm `submission:{id}`. Máy chủ cổng **5000**.
+
+Thiết kế kênh thời gian thực (khung 4 câu hỏi, trả lời trước khi code):
+
+| Câu hỏi | Trả lời | Code tương ứng |
+|---|---|---|
+| ① Sự kiện nào kích hoạt thông điệp? | Mỗi lần trạng thái lượt nộp đổi: received → processing → graded | `UpdateStatusAsync(id, status, ...)` |
+| ② Gửi cho ai? | Chỉ máy khách đang theo dõi đúng lượt nộp đó, không dùng `Clients.All` | `Clients.Group("submission:{id}")` |
+| ③ Gửi kèm dữ liệu gì? | Mã lượt nộp, trạng thái mới, thời điểm đổi | `record SubmissionStatusMessage(Guid SubmissionId, string Status, DateTimeOffset UpdatedAt)` |
+| ④ Mất kết nối thì lấy lại trạng thái thế nào? | SignalR không lưu tin; gọi lại REST | `GET /api/submissions/{id}` |
+
+## EduSubmit – Bước 1: tạo solution RealtimeSubmissionSystem
+
+```powershell
+mkdir RealtimeSubmissionSystem; cd RealtimeSubmissionSystem
+dotnet new sln -n RealtimeSubmissionSystem
+dotnet new web -n Submission.RealtimeApi -o src/Submission.RealtimeApi
+dotnet new console -n Submission.RealtimeClient -o src/Submission.RealtimeClient
+dotnet sln add src/Submission.RealtimeApi/Submission.RealtimeApi.csproj
+dotnet sln add src/Submission.RealtimeClient/Submission.RealtimeClient.csproj
+dotnet add src/Submission.RealtimeClient package Microsoft.AspNetCore.SignalR.Client --version 10.0.15
+dotnet new gitignore
+dotnet build
+```
+
+![build](anhchupminhchung/edusubmit-buoc1-build.png)
+
+Thấy: `Build succeeded`, `0 Error(s)`. Giải thích: máy chủ là template `web` (REST Bài 2 + hub), máy khách là `console` + gói SignalR Client (HttpClient + HubConnection).
