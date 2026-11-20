@@ -4,17 +4,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+app.MapGet("/", () => Results.Ok(
+    new { service = "PingApi", status = "running" }));
+
 app.MapHub<PingHub>("/hubs/ping");
 
-app.MapGet("/", () => "Hello World!");
-
 app.Run();
+
 sealed class PingHub : Hub
 {
     public async Task Echo(string message)
- {
- await Clients.Caller.SendAsync("EchoRespone", $"Echo: {message}");
- }
+    {
+        await Clients.Caller.SendAsync("EchoResponse", $"Echo: {message}");
+    }
 public async Task Broadcast(string message)
  => await Clients.All.SendAsync("BroadcastMessage", message);
 public async Task JoinGroup(string groupName)
