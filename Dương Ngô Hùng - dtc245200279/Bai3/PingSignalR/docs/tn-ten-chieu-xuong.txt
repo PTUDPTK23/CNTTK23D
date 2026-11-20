@@ -1,0 +1,4 @@
+# Thí nghiệm 2 – CHIỀU XUỐNG: hub SendAsync("EchoRespone", ...) (máy khách nghe On("EchoResponse"))
+An da ket noi den PingApi.
+Dang cho thong diep... Nhan Enter de thoat.
+(exit code: 0)
