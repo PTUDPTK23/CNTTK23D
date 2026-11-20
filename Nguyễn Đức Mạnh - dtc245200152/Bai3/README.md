@@ -257,3 +257,13 @@ Giải thích:
 - **Lưu trước, đẩy sau**: ai đọc REST ngay khi nhận tin đều thấy đúng trạng thái.
 - Chỉ gửi 3 trường (mã lượt nộp, trạng thái, thời điểm), không gửi cả `SubmissionDto` (câu ①, ③).
 - REST luôn biết trạng thái đúng; SignalR chỉ giúp máy khách biết **sớm** hơn mà không phải hỏi lại. Hệ thật sẽ thay `Task.Delay` bằng hàng đợi + worker (Bài 6).
+
+## EduSubmit – Bước 5: máy khách mở hai kênh và gắn "chuông" chờ graded
+
+Code `src/Submission.RealtimeClient/Program.cs` phần 1: `HttpClient` (kênh REST, `BaseAddress = http://localhost:5000`) và `HubConnectionBuilder().WithUrl(".../hubs/submissions").WithAutomaticReconnect()` (kênh SignalR); `connection.On<SubmissionStatusMessage>("SubmissionStatusChanged", ...)` in thông báo và bấm chuông `TaskCompletionSource` khi nhận `graded`; `StartAsync()`. Các record DTO khai báo ở cuối tệp, cùng hình dạng JSON với máy chủ.
+
+![ket noi](anhchupminhchung/edusubmit-buoc5-ketnoi.png)
+
+Thấy: máy khách in `Da ket noi SignalR.`
+
+Giải thích: một URL gốc dùng cho cả hai kênh. `On<SubmissionStatusMessage>` – SignalR tự chuyển JSON thành record. `TaskCompletionSource` là một `Task` "bấm tay": hoàn tất khi gọi `TrySetResult`, dùng để chờ một sự kiện (thông báo `graded`).
