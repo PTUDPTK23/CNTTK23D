@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ExamStarter.Api/ExamStarter.Api.csproj" />
+  <Project Path="ExamStarter.Client/ExamStarter.Client.csproj" />
+</Solution>
