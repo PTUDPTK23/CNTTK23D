@@ -1,0 +1,44 @@
+@host = http://localhost:5000
+
+### 1. Kiểm tra dịch vụ — 200
+GET {{host}}/
+
+### 2. Liệt kê bài tập — 200
+GET {{host}}/api/assignments
+
+### 3. Tạo lượt nộp — 201 và Location, status = received
+# @name createSubmission
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200173",
+  "repositoryUrl": "https://example.com/dtc245200173/signalr"
+}
+
+### 4. Đọc lại lượt nộp — 200, status = graded sau khoảng 3 giây
+GET {{host}}/api/submissions/{{createSubmission.response.body.$.id}}
+
+### 5. Thiếu dữ liệu — 400 INVALID_SUBMISSION
+POST {{host}}/api/assignments/1/submissions
+Content-Type: application/json
+
+{}
+
+### 6. Bài tập không tồn tại — 404 ASSIGNMENT_NOT_FOUND
+POST {{host}}/api/assignments/999/submissions
+Content-Type: application/json
+
+{
+  "studentCode": "dtc245200173",
+  "repositoryUrl": "https://example.com/dtc245200173/signalr"
+}
+
+### 7. Lượt nộp không tồn tại — 404 SUBMISSION_NOT_FOUND
+GET {{host}}/api/submissions/00000000-0000-0000-0000-000000000000
+
+### 8. Bắt tay SignalR — 200 có connectionId
+POST {{host}}/hubs/submissions/negotiate?negotiateVersion=1
+
+### 9. Sai đường dẫn hub — 404
+POST {{host}}/hub/submissions/negotiate?negotiateVersion=1
