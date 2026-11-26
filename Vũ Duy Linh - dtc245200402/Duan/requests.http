@@ -1,0 +1,55 @@
+@api = http://localhost:5000
+
+### GET / - Kiểm tra API đang chạy
+GET {{api}}/
+
+### GET /users - Danh sách người dùng
+GET {{api}}/users
+
+### GET /books - Danh sách sách
+GET {{api}}/books
+
+### GET /books?availableOnly=true - Lọc sách còn bản khả dụng
+GET {{api}}/books?availableOnly=true
+
+### GET /books?availableOnly=abc - Sai bộ lọc (400 INVALID_FILTER)
+GET {{api}}/books?availableOnly=abc
+
+### GET /books/{id} - Chi tiết sách (200 OK)
+GET {{api}}/books/1
+
+### GET /books/{id} - Không tìm thấy sách (404 BOOK_NOT_FOUND)
+GET {{api}}/books/999
+
+### POST /reservations - Tạo yêu cầu đặt mượn hợp lệ (201 Created + Location)
+POST {{api}}/reservations
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "bookId": 1
+}
+
+### POST /reservations - Dữ liệu sai (400 INVALID_RESERVATION, gom nhiều lỗi)
+POST {{api}}/reservations
+Content-Type: application/json
+
+{
+    "userId": 0,
+    "bookId": 99
+}
+
+### GET /reservations/{id} - Tra cứu yêu cầu đặt mượn (200 OK)
+GET {{api}}/reservations/1
+
+### GET /reservations/{id} - Không tồn tại (404 RESERVATION_NOT_FOUND)
+GET {{api}}/reservations/999999
+
+### GET /reservations/abc - Sai route (404 rỗng không có body)
+GET {{api}}/reservations/abc
+
+### GET /users/{userId}/reservations - Đặt mượn của người dùng (200 OK)
+GET {{api}}/users/1/reservations
+
+### GET /users/{userId}/reservations - Người dùng không tồn tại (404 USER_NOT_FOUND)
+GET {{api}}/users/999/reservations
