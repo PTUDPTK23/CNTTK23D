@@ -8,6 +8,8 @@
 #   "Bai1 - MSSV - Họ tên", "Bai2 - ..."  -> khoá "1", "2"
 #   "Du an - MSSV - Họ tên" (hoặc "Dự án - ...") -> khoá "duan"
 # Đổi hạn: chỉ cần sửa khối HAN bên dưới (giờ Việt Nam, +07:00).
+# Hạn có 3 mốc: dung_han (đúng hạn), han_chot (hết giờ Muộn, sau đó là Quá hạn), han_cuoi (hạn cuối nhận bài nộp/sửa; bỏ trống thì lấy han_chot).
+# PR MỚI mở sau han_cuoi bị đóng tự động; PR mở trong khoảng han_chot..han_cuoi vẫn nhận nhưng gắn nhãn Quá hạn.
 name: Kiem tra han nop
 on:
   pull_request_target:
@@ -23,8 +25,9 @@ jobs:
         env:
           HAN: |
             {
-              "1":    { "dung_han": "2026-11-06T12:00:00+07:00", "han_chot": "2026-11-11T23:59:59+07:00" },
-              "2":    { "dung_han": "2026-11-13T12:00:00+07:00", "han_chot": "2026-11-13T23:59:59+07:00" },
+              "1":    { "dung_han": "2026-11-06T12:00:00+07:00", "han_chot": "2026-11-11T23:59:59+07:00", "han_cuoi": "2026-11-22T11:00:00+07:00" },
+              "2":    { "dung_han": "2026-11-13T12:00:00+07:00", "han_chot": "2026-11-13T23:59:59+07:00", "han_cuoi": "2026-11-22T11:00:00+07:00" },
+              "3":    { "dung_han": "2026-11-20T11:59:59+07:00", "han_chot": "2026-11-20T23:59:59+07:00", "han_cuoi": "2026-11-22T11:00:00+07:00" },
               "duan": { "dung_han": "2026-11-19T23:59:59+07:00", "han_chot": "2026-11-19T23:59:59+07:00" }
             }
         with:
@@ -54,6 +57,7 @@ jobs:
             const now = new Date();
             const nhan = now <= new Date(han[bai].dung_han) ? "Đúng hạn"
               : now <= new Date(han[bai].han_chot) ? "Muộn" : "Quá hạn";
+            const hanCuoi = new Date(han[bai].han_cuoi || han[bai].han_chot);
             for (const [tenNhan, mau] of [["Đúng hạn","2da44e"],["Muộn","fbca04"],["Quá hạn","d73a4a"]]) {
               try { await github.rest.issues.createLabel({ ...context.repo, name: tenNhan, color: mau }); } catch (e) {}
             }
@@ -68,6 +72,15 @@ jobs:
               const gio = now.toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"});
               // GV tự mở lại PR (người thao tác không phải SV) thì không đóng nữa
               if (context.payload.sender.login !== pr.user.login) return;
+            // Còn trong thời hạn nhận bài sửa/nộp cuối (han_cuoi): vẫn nhận, chỉ gắn nhãn Quá hạn
+            if (now <= hanCuoi) {
+              if (context.payload.action === "opened") {
+                const hc = hanCuoi.toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"});
+                await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number,
+                  body: `${ten} gửi lúc ${gio}, sau hạn chót nên tính là QUÁ HẠN. Hệ thống vẫn nhận bài nộp/sửa đến ${hc}; sau thời điểm này Pull Request mới sẽ bị đóng tự động.` });
+              }
+              return;
+            }
               if (context.payload.action === "synchronize") {
                 await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number,
                   body: `${ten} được cập nhật lúc ${gio}, sau hạn chót. Phần cập nhật này tính là QUÁ HẠN; giảng viên sẽ quyết định có chấm hay không.` });
