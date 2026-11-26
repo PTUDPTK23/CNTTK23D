@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Library.Api/Library.Api.csproj" />
+  <Project Path="Library.Client/Library.Client.csproj" />
+  <Project Path="Library.Contracts/Library.Contracts.csproj" />
+  <Project Path="Reservation.Worker/Reservation.Worker.csproj" />
+</Solution>
