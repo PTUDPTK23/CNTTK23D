@@ -70,3 +70,7 @@ Chi tiết và ảnh từng thí nghiệm: [`RealtimeSubmissionSystem/docs/nhat-
 ## Bài tập vận dụng
 
 Bài tập 2 – trạng thái `failed`: kho mã nguồn không bắt đầu bằng `https://` thì trạng thái cuối là `failed`; máy khách in cảnh báo màu đỏ ([ảnh](RealtimeSubmissionSystem/docs/rs-bt2-http-failed.png)).
+
+## Kiểm tra lại trước hạn nộp
+
+Ngày 26/11/2026 09:14: build lại cả 2 solution (4 project) – Build succeeded, 0 lỗi.
