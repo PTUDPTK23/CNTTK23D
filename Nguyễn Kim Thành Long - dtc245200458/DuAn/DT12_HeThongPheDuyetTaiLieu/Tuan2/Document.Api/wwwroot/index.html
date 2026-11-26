@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DT12 – Hệ thống Phê duyệt Tài liệu Phân tán</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white shadow-lg shadow-indigo-500/30">DT12</span>
+          <h1 class="text-xl font-bold tracking-tight text-white">Hệ thống Phê duyệt Tài liệu Phân tán</h1>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">
+          State Machine (Draft → Submitted → Approved / Rejected) · SQLite Persistence · Optimistic Concurrency (RowVersion)
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+          API Online
+        </span>
+        <button onclick="loadDocuments()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition">
+          ↻ Làm mới
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Toast / Alert Banner -->
+    <div id="alertBox" class="hidden rounded-xl border p-4 text-sm transition-all"></div>
+
+    <!-- Stats Cards -->
+    <section class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4">
+        <p class="text-xs font-medium text-slate-400">Tổng tài liệu</p>
+        <p id="statTotal" class="text-2xl font-bold text-white mt-1">0</p>
+      </div>
+      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4">
+        <p class="text-xs font-medium text-slate-400">Draft (Nháp)</p>
+        <p id="statDraft" class="text-2xl font-bold text-slate-300 mt-1">0</p>
+      </div>
+      <div class="rounded-xl bg-slate-900 border border-amber-500/30 p-4">
+        <p class="text-xs font-medium text-amber-300">Submitted (Chờ duyệt)</p>
+        <p id="statSubmitted" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+      </div>
+      <div class="rounded-xl bg-slate-900 border border-emerald-500/30 p-4">
+        <p class="text-xs font-medium text-emerald-300">Approved (Đã duyệt)</p>
+        <p id="statApproved" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
+      </div>
+      <div class="rounded-xl bg-slate-900 border border-rose-500/30 p-4 col-span-2 sm:col-span-1">
+        <p class="text-xs font-medium text-rose-300">Rejected (Từ chối)</p>
+        <p id="statRejected" class="text-2xl font-bold text-rose-400 mt-1">0</p>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Create Document Form -->
+      <section class="lg:col-span-4 rounded-2xl bg-slate-900 border border-slate-800 p-5 h-fit">
+        <h2 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+          Tạo tài liệu mới (Draft)
+        </h2>
+        <form id="createForm" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Tiêu đề (Title) *</label>
+            <input id="titleInput" type="text" required placeholder="VD: Tờ trình mua sắm thiết bị"
+              class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Nội dung (Content) *</label>
+            <textarea id="contentInput" rows="3" required placeholder="Nhập nội dung chi tiết tài liệu..."
+              class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Người tạo (CreatedBy) *</label>
+            <input id="createdByInput" type="text" required value="nguyen.kim.thanh.long"
+              class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Người phê duyệt (Approver)</label>
+            <input id="approverInput" type="text" value="truong.phong.it"
+              class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <button type="submit"
+            class="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition">
+            + Tạo tài liệu mới
+          </button>
+        </form>
+      </section>
+
+      <!-- Document List -->
+      <section class="lg:col-span-8 rounded-2xl bg-slate-900 border border-slate-800 p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <h2 class="text-base font-semibold text-white">Danh sách tài liệu</h2>
+          <div class="flex flex-wrap gap-1.5" id="filterTabs">
+            <button data-status="" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white">Tất cả</button>
+            <button data-status="Draft" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Draft</button>
+            <button data-status="Submitted" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Submitted</button>
+            <button data-status="Approved" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Approved</button>
+            <button data-status="Rejected" class="filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Rejected</button>
+          </div>
+        </div>
+
+        <div id="documentsList" class="space-y-3">
+          <p class="text-sm text-slate-400">Đang tải dữ liệu...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- History Modal -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 id="modalTitle" class="text-base font-semibold text-white">Lịch sử xử lý tài liệu</h3>
+          <p id="modalSubtitle" class="text-xs text-slate-400 mt-0.5"></p>
+        </div>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white text-lg px-2">✕</button>
+      </div>
+      <div id="modalBody" class="p-5 overflow-y-auto space-y-4 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Reject Reason Modal -->
+  <div id="rejectModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      <h3 class="text-base font-semibold text-white">Từ chối tài liệu</h3>
+      <p class="text-xs text-slate-400">Vui lòng nhập lý do từ chối (bắt buộc):</p>
+      <textarea id="rejectReasonInput" rows="3" placeholder="VD: Thiếu bảng dự toán kinh phí chi tiết..."
+        class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeRejectModal()" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Hủy</button>
+        <button onclick="confirmReject()" class="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white">Xác nhận từ chối</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFilter = '';
+    let pendingRejectDoc = null;
+
+    const statusBadgeMap = {
+      Draft: 'bg-slate-700/60 text-slate-200 border-slate-600',
+      Submitted: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      Approved: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      Rejected: 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+    };
+
+    function showAlert(message, type = 'info') {
+      const box = document.getElementById('alertBox');
+      const styles = {
+        success: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200',
+        error: 'bg-rose-500/15 border-rose-500/40 text-rose-200',
+        warning: 'bg-amber-500/15 border-amber-500/40 text-amber-200',
+        info: 'bg-indigo-500/15 border-indigo-500/40 text-indigo-200'
+      };
+      box.className = `rounded-xl border p-4 text-sm ${styles[type] || styles.info}`;
+      box.innerHTML = message;
+      box.classList.remove('hidden');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function loadDocuments() {
+      try {
+        const allRes = await fetch('/documents');
+        const allDocs = await allRes.json();
+
+        document.getElementById('statTotal').textContent = allDocs.length;
+        document.getElementById('statDraft').textContent = allDocs.filter(d => d.status === 'Draft').length;
+        document.getElementById('statSubmitted').textContent = allDocs.filter(d => d.status === 'Submitted').length;
+        document.getElementById('statApproved').textContent = allDocs.filter(d => d.status === 'Approved').length;
+        document.getElementById('statRejected').textContent = allDocs.filter(d => d.status === 'Rejected').length;
+
+        const filteredDocs = currentFilter
+          ? allDocs.filter(d => d.status === currentFilter)
+          : allDocs;
+
+        renderDocuments(filteredDocs);
+      } catch (err) {
+        showAlert(`Không thể tải danh sách tài liệu: ${escapeHtml(err.message)}`, 'error');
+      }
+    }
+
+    function renderDocuments(docs) {
+      const container = document.getElementById('documentsList');
+      if (!docs.length) {
+        container.innerHTML = '<div class="rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-500">Chưa có tài liệu nào phù hợp bộ lọc.</div>';
+        return;
+      }
+
+      container.innerHTML = docs.map(doc => {
+        const badgeClass = statusBadgeMap[doc.status] || statusBadgeMap.Draft;
+        const created = new Date(doc.createdAt).toLocaleString('vi-VN');
+
+        let actionButtons = '';
+        if (doc.status === 'Draft') {
+          actionButtons += `<button onclick="submitDoc('${doc.id}', ${doc.version})" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white transition">Gửi duyệt (Submit)</button>`;
+        } else if (doc.status === 'Submitted') {
+          actionButtons += `
+            <button onclick="approveDoc('${doc.id}', ${doc.version})" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">Phê duyệt (Approve)</button>
+            <button onclick="openRejectModal('${doc.id}', ${doc.version})" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition">Từ chối (Reject)</button>
+            <button onclick="simulateRaceCondition('${doc.id}', ${doc.version})" class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-xs font-semibold text-white transition shadow-md shadow-violet-500/20">⚡ Test Xung Đột Đồng Thời</button>
+          `;
+        }
+
+        return `
+          <div class="rounded-xl bg-slate-950/70 border border-slate-800 p-4 hover:border-slate-700 transition">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}">${doc.status}</span>
+                  <span class="px-2 py-0.5 rounded-md text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700">v${doc.version}</span>
+                  <h3 class="text-sm font-semibold text-white">${escapeHtml(doc.title)}</h3>
+                </div>
+                <p class="text-xs text-slate-300">${escapeHtml(doc.content)}</p>
+                <p class="text-[11px] text-slate-500">
+                  Tạo bởi: <span class="text-slate-300">${escapeHtml(doc.createdBy)}</span> ·
+                  Duyệt bởi: <span class="text-slate-300">${escapeHtml(doc.approver)}</span> ·
+                  ${created}
+                </p>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
+              ${actionButtons}
+              <button onclick="viewHistory('${doc.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition ml-auto">
+                Xem lịch sử (Timeline)
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        title: document.getElementById('titleInput').value,
+        content: document.getElementById('contentInput').value,
+        createdBy: document.getElementById('createdByInput').value,
+        approver: document.getElementById('approverInput').value
+      };
+
+      const res = await fetch('/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert(escapeHtml(data.error || 'Tạo tài liệu thất bại.'), 'error');
+        return;
+      }
+
+      document.getElementById('titleInput').value = '';
+      document.getElementById('contentInput').value = '';
+      showAlert(`Đã tạo tài liệu <strong>${escapeHtml(data.title)}</strong> ở trạng thái <strong>Draft</strong> (v${data.version}).`, 'success');
+      await loadDocuments();
+    });
+
+    async function submitDoc(id, version) {
+      const res = await fetch(`/documents/${id}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expectedVersion: version, note: 'Gửi duyệt từ Web Dashboard.' })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert(`HTTP ${res.status}: ${escapeHtml(data.error)}`, 'error');
+      } else {
+        showAlert(`Đã gửi duyệt tài liệu <strong>${escapeHtml(data.title)}</strong> (Draft → Submitted, v${data.version}).`, 'success');
+      }
+      await loadDocuments();
+    }
+
+    async function approveDoc(id, version) {
+      const res = await fetch(`/documents/${id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expectedVersion: version, performedBy: 'approver.web', note: 'Phê duyệt từ Web Dashboard.' })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert(`HTTP ${res.status}: ${escapeHtml(data.error)}`, 'error');
+      } else {
+        showAlert(`Đã phê duyệt tài liệu <strong>${escapeHtml(data.title)}</strong> (Submitted → Approved, v${data.version}).`, 'success');
+      }
+      await loadDocuments();
+    }
+
+    function openRejectModal(id, version) {
+      pendingRejectDoc = { id, version };
+      document.getElementById('rejectReasonInput').value = '';
+      document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+      pendingRejectDoc = null;
+      document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    async function confirmReject() {
+      if (!pendingRejectDoc) return;
+      const reason = document.getElementById('rejectReasonInput').value;
+      const res = await fetch(`/documents/${pendingRejectDoc.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          expectedVersion: pendingRejectDoc.version,
+          performedBy: 'approver.web',
+          note: reason
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert(`HTTP ${res.status}: ${escapeHtml(data.error)}`, 'error');
+      } else {
+        showAlert(`Đã từ chối tài liệu <strong>${escapeHtml(data.title)}</strong> (Submitted → Rejected, v${data.version}).`, 'warning');
+      }
+      closeRejectModal();
+      await loadDocuments();
+    }
+
+    async function simulateRaceCondition(id, version) {
+      showAlert('Đang bắn đồng thời 2 request <strong>Approve</strong> và <strong>Reject</strong> với cùng Version v' + version + '...', 'info');
+
+      const [approveRes, rejectRes] = await Promise.all([
+        fetch(`/documents/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            expectedVersion: version,
+            performedBy: 'nguoi.duyet.A',
+            note: 'Race Condition Test: Approve đồng thời'
+          })
+        }),
+        fetch(`/documents/${id}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            expectedVersion: version,
+            performedBy: 'nguoi.duyet.B',
+            note: 'Race Condition Test: Reject đồng thời'
+          })
+        })
+      ]);
+
+      const approveBody = await approveRes.json();
+      const rejectBody = await rejectRes.json();
+
+      const summary = `
+        <div class="font-semibold mb-1">⚡ Kết quả kiểm thử Xung Đột Đồng Thời (Optimistic Concurrency):</div>
+        <ul class="list-disc pl-5 space-y-1 text-xs">
+          <li><strong>Request 1 (Approve):</strong> HTTP ${approveRes.status} — ${approveRes.ok ? 'Thành công (' + approveBody.status + ', v' + approveBody.version + ')' : escapeHtml(approveBody.error)}</li>
+          <li><strong>Request 2 (Reject):</strong> HTTP ${rejectRes.status} — ${rejectRes.ok ? 'Thành công (' + rejectBody.status + ', v' + rejectBody.version + ')' : escapeHtml(rejectBody.error)}</li>
+        </ul>
+      `;
+
+      const oneSucceededAndOneConflicted =
+        (approveRes.status === 200 && rejectRes.status === 409) ||
+        (rejectRes.status === 200 && approveRes.status === 409);
+
+      showAlert(summary, oneSucceededAndOneConflicted ? 'success' : 'warning');
+      await loadDocuments();
+    }
+
+    async function viewHistory(id) {
+      const res = await fetch(`/documents/${id}`);
+      const doc = await res.json();
+      if (!res.ok) {
+        showAlert(escapeHtml(doc.error || 'Không tải được lịch sử.'), 'error');
+        return;
+      }
+
+      document.getElementById('modalTitle').textContent = doc.title;
+      document.getElementById('modalSubtitle').textContent = `Id: ${doc.id} · Trạng thái: ${doc.status} · Version: v${doc.version}`;
+
+      const body = document.getElementById('modalBody');
+      body.innerHTML = `
+        <div class="rounded-xl bg-slate-950 border border-slate-800 p-3.5 text-xs text-slate-300">
+          ${escapeHtml(doc.content)}
+        </div>
+        <div class="relative pl-5 border-l-2 border-slate-700 space-y-4">
+          ${doc.history.map(h => `
+            <div class="relative">
+              <span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-indigo-500 ring-4 ring-slate-900"></span>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-semibold text-white">${escapeHtml(h.action)}
+                  <span class="text-xs font-normal text-slate-400">(${h.fromStatus ? escapeHtml(h.fromStatus) + ' → ' : ''}${escapeHtml(h.toStatus)})</span>
+                </span>
+                <span class="text-[11px] text-slate-400">${new Date(h.timestamp).toLocaleString('vi-VN')}</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">${escapeHtml(h.note)}</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Thực hiện: ${escapeHtml(h.performedBy)} · HistoryId: ${h.historyId}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      document.getElementById('historyModal').classList.remove('hidden');
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.add('hidden');
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.status;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.className = 'filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700';
+        });
+        btn.className = 'filter-btn px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white';
+        loadDocuments();
+      });
+    });
+
+    loadDocuments();
+  </script>
+</body>
+</html>
