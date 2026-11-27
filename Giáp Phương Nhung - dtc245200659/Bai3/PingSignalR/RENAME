@@ -1,0 +1,50 @@
+## Buoc 1
+![tạo thư mục, solution và hai project máy chủ, máy khách](../../Bài2/img/2026-11-20-10-09-20.png)
+![ghi danh project, thêm gói SignalR cho máy khách, build thử](../../Bài2/img/2026-11-20-10-09-53.png)
+
+## Buoc 2
+![máy chủ chỉ cần thêm hai dòng để có một hub SignalR](../../Bài2/img/2026-11-20-10-11-04.png)
+![kiểm tra: gọi bước bắt tay negotiate bằng curl, chưa cần máy khách](../../Bài2/img/2026-11-20-10-11-48.png)
+
+## Buoc 3
+![phương thức Echo, máy chủ trả lời riêng người vừa gọi](../../Bài2/img/2026-11-20-10-12-23.png)
+
+## Buoc 4
+![ máy khách xây kết nối, đăng ký nghe, rồi mở kết nối](../../Bài2/img/2026-11-20-10-13-18.png)
+![gọi Echo bằng InvokeAsync rồi chạy hai tiến trình](../../Bài2/img/2026-11-20-10-13-31.png)
+
+## Buoc 5
+![thêm phát rộng và nhóm, ba phạm vi gửi trong cùng một hub](../../Bài2/img/2026-11-20-10-14-34.png)
+![dán ba đoạn code vào đúng chỗ trong hai tệp Program.cs](../../Bài2/img/2026-11-20-10-14-47.png)
+![chạy ba terminal theo thứ tự để An và Bình thấy tin của nhau](../../Bài2/img/2026-11-20-10-15-11.png)
+
+## Buoc  6
+![vòng đời kết nối, máy chủ biết ai vừa nối, máy khách biết khi rớt](../../Bài2/img/2026-11-20-10-16-15.png)
+![thí nghiệm: tắt máy chủ, máy khách thử lại sau 0, 2, 10, 30 giây](../../Bài2/img/2026-11-20-10-16-26.png)
+
+## Buoc 7
+![Thí nghiệm 1: Máy chủ chưa chạy](../../Bài2/img/2026-11-20-10-17-14.png)
+Giải thích: Lệnh StartAsync() ném lỗi ngay khi không thể kết nối tới cổng 5200. Cơ chế .WithAutomaticReconnect() chỉ có tác dụng khôi phục một kết nối đã mở thành công trước đó, không có tác dụng khi kết nối ban đầu bị từ chối
+![Thí nghiệm 2: Sai đường dẫn hub](../../Bài2/img/2026-11-20-10-17-50.png)
+Giải thích: Trước khi mở WebSocket, SignalR client luôn gửi một yêu cầu HTTP POST tới địa chỉ {url}/negotiate để thỏa thuận giao thức. Vì đường dẫn /hub/ping không khớp với app.MapHub<PingHub>("/hubs/ping") đã khai báo trên máy chủ nên bước negotiate trả về mã lỗi 404 Not Found
+![Thí nghiệm 3: Sai tên thông điệp](../../Bài2/img/2026-11-20-10-18-24.png)
+Giải thích: Trong SignalR, tên sự kiện là một chuỗi văn bản lỏng lẻo. Máy chủ vẫn gửi gói tin mang tên "EchoResponse", nhưng phía máy khách chỉ lắng nghe "EchoRespone" nên gói tin bị bỏ qua trong im lặng. Khi gặp lỗi "chạy không báo lỗi nhưng không nhận được gì", việc đầu tiên cần làm là đối chiếu chính tả tên phương thức giữa hai phía.
+
+
+# BAI2
+## Buoc1
+![ tạo solution mới với hai project như Bài 2, thêm gói cho máy khách](../../Bài2/img/2026-11-20-10-27-35.png)
+## Buoc2
+![ dán phần REST của Bài 2, thêm UpdatedAt và một khóa dữ liệu](../../Bài2/img/2026-11-20-10-35-24.png)
+## Buoc3
+![ hub mỏng chỉ làm một việc, đưa kết nối vào nhóm của lượt nộp](../../Bài2/img/2026-11-20-10-43-21.png)
+## Buoc4
+![cập nhật dữ liệu trước, rồi mới đẩy thông báo tới đúng nhóm](../../Bài2/img/2026-11-20-10-50-05.png)
+![kiểm tra: chưa cần máy khách, REST đã thấy trạng thái đổi dần](../../Bài2/img/2026-11-20-10-53-23.png)
+## Buoc5
+![máy khách mở hai kênh và gắn "chuông" chờ trạng thái graded](../../Bài2/img/2026-11-20-10-56-05.png)
+## Buoc6
+![tạo lượt nộp bằng REST, theo dõi bằng SignalR, chốt lại bằng REST](../../Bài2/img/2026-11-20-10-58-12.png)
+![ kết quả: hai cập nhật đến từ máy chủ mà máy khách không hề hỏi](../../Bài2/img/2026-11-20-11-00-18.png)
+## Buoc8
+![ requests.http gom các ca REST và bước bắt tay của hub](../../Bài2/img/2026-11-20-11-03-12.png)
